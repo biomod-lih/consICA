@@ -1,0 +1,41 @@
+Package: consICA
+Type: Package
+biocViews: Technology, StatisticalMethod, Sequencing, RNASeq, Transcriptomics, 
+  Classification, FeatureExtraction
+Title: consensus Indenpendent Component Analysis
+Version: 0.99.0
+Authors@R: 
+    c(person(given = "Petr V.",
+             family = "Nazarov",
+             role = c("aut", "cre"),
+             email = "petr.nazarov@lih.lu",
+             comment = c(ORCID = "0000-0003-3443-0298")),
+        person(given = "Tony",
+               family = "Kaoma",
+               role="aut",
+               email="tony.kaoma@lih.lu",
+               comment = c(ORCID = "0000-0002-1269-4826")),
+        person(given = "Maryna",
+             family = "Chepeleva",
+             role = c("aut"),
+             email = "maryna.chepeleva@gmail.com",
+             comment = c(ORCID = "0000-0003-3036-4916"))       
+    )
+Description: consICA implements a data-driven deconvolution method – consensus 
+  independent component analysis (ICA) to decompose heterogeneous omics data and 
+  extract features suitable for patient diagnostics and prognostics. 
+  The method separates biologically relevant transcriptional signals from 
+  technical effects and provides information about cellular composition and biological processes.
+  The implementation of parallel computing in the package ensures the efficient 
+  analysis on the modern multicore systems.
+BugReports: https://github.com/biomod-lih/consICA/issues
+License: Artistic-2.0
+Encoding: UTF-8
+LazyData: false
+Imports: fastICA (>= 1.2.1), parallel (>= 3.5.2), doSNOW (>= 1.0.16), 
+    sm, org.Hs.eg.db,GO.db, stats, 
+    pheatmap,doMC,gplots,survival, topGO, graphics, grDevices
+Depends: R (>= 4.1.0)
+Suggests: knitr, BiocStyle, rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.1.2
