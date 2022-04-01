@@ -96,8 +96,7 @@ plotICVarianceExplained(cica)
 For each component we can carry out an enrichment analysis. The genes with expression above the selected threshold in at least one sample, were used as a background gene list and significantly overrepresented(adj.p-value < `alpha`) GO terms. You can select the db for search: biological process ("BP"), molecular function ("MF") and/or cellular component ("CC").
 ```{r, results='hide'}
 ## save time for this example
-path <- system.file("extdata", "GOs_40", package = "consICA")
-#GOs <- readRDS(path)
+#
 ## Search GO (biological process)
 # GOs <- getGO(cica, alpha = 0.05, db = "BP")
 ## Search GO (biological process, molecular function, cellular component)

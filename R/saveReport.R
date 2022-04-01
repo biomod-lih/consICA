@@ -50,7 +50,7 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
                                                   "fdr")
   }
   for (icomp in show.components){
-    cat("Working with component #",icomp,"\n")
+    #cat("Working with component #",icomp,"\n")
     par(mfcol=c(1,1),mar=c(3,3,2,1))
     plot.new()
     title(sprintf(main,icomp,mean(IC$stab[,icomp])),cex.main=0.8)
