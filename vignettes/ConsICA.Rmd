@@ -56,7 +56,7 @@ dim(Sur)
 # Consensus independent component analysis
 Independent component analysis (ICA) is an unsupervised method of signal deconvolution [2]. 
 ICA decomposes combined gene expression matrix from multiple samples into meaningful signals in the space of genes (metagenes, S)  and weights in the space of samples (weight matrix, M). 
-```{r echo=FALSE, out.width='75%', fig.align="center"}
+```{r echo=FALSE, out.width='95%', fig.align="center"}
 knitr::include_graphics('./Picture1.jpg')
 ```
 Figure 1. ICA decomposes combined gene expression matrix from multiple samples into meaningful signals in the space of genes (metagenes, S) and weights in the space of samples (weight matrix, M). Biological processes and signatures of cell subtypes can be found in S, while M could be linked to patient groups and patient survival (Cox regression and Eq.1). 
@@ -89,14 +89,14 @@ plot(sort(cica$S[,icomp]),col = "#0000FF", type="l", ylab=("involvement"),xlab="
 Estimate the variance explained by the independent components with `estimateVarianceExplained`. Use `plotICVarianceExplained` to plot it.
 ```{r}
 var_ic <- estimateVarianceExplained(cica)
-plotICVarianceExplained(cica)
+p <- plotICVarianceExplained(cica)
 ```
 
 # Enrichment analysis
 For each component we can carry out an enrichment analysis. The genes with expression above the selected threshold in at least one sample, were used as a background gene list and significantly overrepresented(adj.p-value < `alpha`) GO terms. You can select the db for search: biological process ("BP"), molecular function ("MF") and/or cellular component ("CC").
 ```{r, results='hide'}
-## save time for this example
-#
+## To save time for this example load result of getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
+GOs <- readRDS(url("http://edu.modas.lu/data/consICA/GOs_40_s2022.rds", "r"))
 ## Search GO (biological process)
 # GOs <- getGO(cica, alpha = 0.05, db = "BP")
 ## Search GO (biological process, molecular function, cellular component)
@@ -119,7 +119,7 @@ if(FALSE){
   saveReport(cica, GO=GOs, Var=Var, surv = Sur)
 }
 ```
-The copy of this report you can find at https://github.com/biomod-lih/consICA/blob/master/vignettes/report_ICA_40.pdf
+The copy of this report you can find at http://edu.modas.lu/data/consICA/report_ICA_40.pdf
 
 # References 
 1. Nazarov, P.V., Wienecke-Baldacchino, A.K., Zinovyev, A. et al. Deconvolution of transcriptomes and miRNomes by independent component analysis provides insights into biological processes and clinical outcomes of melanoma patients. BMC Med Genomics 12, 132 (2019). https://doi.org/10.1186/s12920-019-0578-4

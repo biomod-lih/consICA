@@ -51,8 +51,8 @@ estimateVarianceExplained <- function(cica, X=NULL) {
 #' coefficient of determination (R2). \cr
 #' For details on the computation see the help of the 
 #' \code{\link[consICA]{estimateVarianceExplained}} function
-#' @param cica consICA compilant list with 
-#' @param sort specify the arrangment as 'asc'/'desc'. No sorting if NULL
+#' @param cica consICA compliant list with 
+#' @param sort specify the arrangement as 'asc'/'desc'. No sorting if NULL
 #' @param las orientation value for the axis labels (0 - always parallel to the 
 #' axis, 1 - always horizontal, 2 - always perpendicular to the axis, 
 #' 3 - always vertical)
@@ -60,7 +60,7 @@ estimateVarianceExplained <- function(cica, X=NULL) {
 #' @param x.cex specify the size of the tick label numbers/text with a numeric 
 #' value of length 1
 #' @param ... extra arguments to be passed to \code{\link{barplot}}
-#' @return ggplot object
+#' @return A numeric vector compliant to `barplot` output
 #' @export
 #' @examples
 #' data("samples_data")

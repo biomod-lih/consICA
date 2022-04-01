@@ -14,9 +14,9 @@ plotICVarianceExplained(
 )
 }
 \arguments{
-\item{cica}{consICA compilant list with}
+\item{cica}{consICA compliant list with}
 
-\item{sort}{specify the arrangment as 'asc'/'desc'. No sorting if NULL}
+\item{sort}{specify the arrangement as 'asc'/'desc'. No sorting if NULL}
 
 \item{las}{orientation value for the axis labels (0 - always parallel to the 
 axis, 1 - always horizontal, 2 - always perpendicular to the axis, 
@@ -30,7 +30,7 @@ value of length 1}
 \item{...}{extra arguments to be passed to \code{\link{barplot}}}
 }
 \value{
-ggplot object
+A numeric vector compliant to `barplot` output
 }
 \description{
 Method to plot variance explained (R-squared) by the MOFA model 
