@@ -49,7 +49,7 @@ for the component, ANOVA analysis for samples characteristics and stability
 }
 \examples{
 data("samples_data")
-cica <- consICA(samples_data$X, ncomp=40, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=40, ntry=10, show.every=0)
 GOs <- NULL 
 if(FALSE){
 GOs <- getGO(cica, db = "BP")

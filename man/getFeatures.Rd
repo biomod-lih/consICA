@@ -26,8 +26,8 @@ their false discovery rates values
 }
 \examples{
 data("samples_data")
-# Get deconvolution of X
-RES <-  consICA(samples_data$X, ncomp=10, ntry=1, show.every=0)
+# Get deconvolution of X matrix
+RES <-  consICA(samples_data, ncomp=10, ntry=1, show.every=0)
 # Get features names and FDR for each component
 features <- getFeatures(RES)
 # Positive affecting features for first components are

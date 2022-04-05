@@ -6,23 +6,23 @@
 #' we used the coefficient\cr of determination (R2) between the normalized 
 #' input (X-mean(X)) and (S*M)
 #' @param cica list compliant to `consICA()` result
-#' @param X input matrix used for the model. Will be used if consICA$X is NULL,
-#' ignore otherwise.
+#' @param X a `SummarizedExperiment` object. Assay  used for the model. 
+#' Will be used if consICA$X is NULL, ignore otherwise.
 #' @return a list of:\cr
 #'     \item{R2}{total variance explained by the model}
 #'     \item{R2_ics}{Amount of variance explained by the each independent 
 #'      component}
 #' @examples
 #' data("samples_data")
-#' cica <- consICA(samples_data$X, ncomp=15, ntry=10, show.every=0)
+#' cica <- consICA(samples_data, ncomp=15, ntry=10, show.every=0)
 #' var_ic <- estimateVarianceExplained(cica)
 #' @export
 estimateVarianceExplained <- function(cica, X=NULL) {
     if(!is.consICA(cica))  return (NULL)
     if(!is.null(cica$X))  X<-cica$X
     if(is.null(X))  return (NULL)
-    if(!is.matrix(X))  return (NULL)
     
+    X <- as.matrix(assay(X))
     S <- cica$S # G x C
     M <- cica$M # C x S
     
@@ -51,7 +51,7 @@ estimateVarianceExplained <- function(cica, X=NULL) {
 #' coefficient of determination (R2). \cr
 #' For details on the computation see the help of the 
 #' \code{\link[consICA]{estimateVarianceExplained}} function
-#' @param cica consICA compliant list with 
+#' @param cica consICA compliant list  
 #' @param sort specify the arrangement as 'asc'/'desc'. No sorting if NULL
 #' @param las orientation value for the axis labels (0 - always parallel to the 
 #' axis, 1 - always horizontal, 2 - always perpendicular to the axis, 
@@ -64,7 +64,7 @@ estimateVarianceExplained <- function(cica, X=NULL) {
 #' @export
 #' @examples
 #' data("samples_data")
-#' cica <- consICA(samples_data$X, ncomp=15, ntry=10, show.every=0)
+#' cica <- consICA(samples_data, ncomp=15, ntry=10, show.every=0)
 #' p <- plotICVarianceExplained(cica, sort = "asc")
 plotICVarianceExplained <- function(cica,
                                     sort=NULL,

@@ -14,7 +14,9 @@ oneICA(
 )
 }
 \arguments{
-\item{X}{matrix with features in rows and samples in columns}
+\item{X}{a `SummarizedExperiment` object. Assay used as data matrix with 
+features in rows and samples in columns. 
+See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
 
 \item{ncomp}{number of components. Default value is 10}
 
@@ -33,10 +35,10 @@ simultaneously. Default value is "deflation"}
 }
 \value{
 a list with
-        X - data
-        nsples, nfeatures - dimentions of X
-        S, M - consensus metagene and weight matrix
-        ncomp - number of components
+        \item{X}{input `SummarizedExperiment` object}
+        \item{nsamples, nfeatures}{dimension of X assay}
+        \item{S, M}{consensus metagene and weight matrix}
+        \item{ncomp}{number of components}
 }
 \description{
 Runs \code{\link[fastICA]{fastICA}} once and store in a 
@@ -44,7 +46,7 @@ consICA manner
 }
 \examples{
 data("samples_data")
-res <- oneICA(samples_data$X)
+res <- oneICA(samples_data)
 }
 \seealso{
 \code{\link[fastICA]{fastICA}}

@@ -17,9 +17,10 @@
 #'     in individual cox model)}
 #' @examples
 #' data("samples_data")
-#' # Get deconvolution of X
-#' cica <-  consICA(samples_data$X, ncomp=10, ntry=1, show.every=0)
-#' surv <- survivalAnalysis(cica, surv = samples_data$Sur) 
+#' # Get deconvolution of X matrix
+#' cica <-  consICA(samples_data, ncomp=10, ntry=1, show.every=0)
+#' surv <- survivalAnalysis(cica, 
+#'   surv = SummarizedExperiment::colData(samples_data)[,c("time", "event")]) 
 #' @export
 #' @import survival
 survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){

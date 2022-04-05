@@ -34,23 +34,23 @@ library('consICA')
 ```
 
 # Example dataset
-The usage of the package functions for an independent component deconvolution is shown for an example set of 472 samples and 2454 most variable genes from the skin cutaneous melanoma (SKCM) TCGA cohort. 
-In addition the data includes metadata such as age, gender, cancer subtype etc. and survival time-to-event data.
+The usage of the package functions for an independent component deconvolution is shown for an example set of 472 samples and 2454 most variable genes from the skin cutaneous melanoma (SKCM) TCGA cohort. It stored as a `SummarizedExperiment` object. In addition the data includes metadata such as age, gender, cancer subtype etc. and survival time-to-event data.
 Use data as
 ```{r}
+library(SummarizedExperiment, verbose = FALSE)
 data("samples_data")
 
-names(samples_data)
-# expression matrix of 2454 genes and 472 samples
-X <- samples_data$X
+samples_data
+# According to our terminology expression matrix X of 2454 genes and 472 samples
+X <- data.frame(assay(samples_data))
 dim(X)
 # variables described each sample
-Var <- samples_data$Var
+Var <- data.frame(colData(samples_data))
 dim(Var)
 colnames(Var)[1:20] # print first 20
 # survival time and event for each sample
-Sur <- samples_data$Sur
-dim(Sur)
+Sur <- data.frame(colData(samples_data))[,c("time", "event")]
+Var <- Var[,-which(colnames(Var) != "time" & colnames(Var) != "event")]
 
 ```
 # Consensus independent component analysis
@@ -66,11 +66,11 @@ matrix of statistically independent and biologically meaningful signals (metagen
 
 ```{r}
 set.seed(2022)
-cica <- consICA(X, ncomp=40, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=40, ntry=10, show.every=0)
 ```
-The output of consensus ICA is a list with input data `X` and it dimensions, consensus metagene `S` and weight matrix `M`, number of components, mean R2 between rows of M (`mr2`), stability as mean R2 between consistent columns of S in multiple tries  (`stab`) and number of best iteration (`ibest`). For compact output use `reduced` = TRUE.
+The output of consensus ICA is a list with input data `X` (assays of SummarizedExperiment  `samples_data` object) and it dimensions, consensus metagene `S` and weight matrix `M`, number of components, mean R2 between rows of M (`mr2`), stability as mean R2 between consistent columns of S in multiple tries  (`stab`) and number of best iteration (`ibest`). For compact output use `reduced` = TRUE.
 ```{r}
-str(cica)
+str(cica, max.level=1)
 ```
 
 Now we can extract the names of features (rows in `X` and `S` matrices) and their false discovery rates values for positive/negative contribution to each component. Use `getFeatures` to extract them.
@@ -96,7 +96,12 @@ p <- plotICVarianceExplained(cica)
 For each component we can carry out an enrichment analysis. The genes with expression above the selected threshold in at least one sample, were used as a background gene list and significantly overrepresented(adj.p-value < `alpha`) GO terms. You can select the db for search: biological process ("BP"), molecular function ("MF") and/or cellular component ("CC").
 ```{r, results='hide'}
 ## To save time for this example load result of getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
-GOs <- readRDS(url("http://edu.modas.lu/data/consICA/GOs_40_s2022.rds", "r"))
+if(!exists("GOs_40_s2022.rds")){
+  GOs <- readRDS(url("http://edu.modas.lu/data/consICA/GOs_40_s2022.rds", "r"))
+  saveRDS(GOs, "GOs_40_s2022.rds")
+} else{
+    GOs <- readRDS("GOs_40_s2022.rds")
+}
 ## Search GO (biological process)
 # GOs <- getGO(cica, alpha = 0.05, db = "BP")
 ## Search GO (biological process, molecular function, cellular component)
@@ -121,6 +126,15 @@ if(FALSE){
 ```
 The copy of this report you can find at http://edu.modas.lu/data/consICA/report_ICA_40.pdf
 
+```{r}
+# delete loaded file after vignette run
+unlink("GOs_40_s2022.rds")
+```
+
+# Session info 
+```{r}
+sessionInfo()
+```
 # References 
 1. Nazarov, P.V., Wienecke-Baldacchino, A.K., Zinovyev, A. et al. Deconvolution of transcriptomes and miRNomes by independent component analysis provides insights into biological processes and clinical outcomes of melanoma patients. BMC Med Genomics 12, 132 (2019). https://doi.org/10.1186/s12920-019-0578-4
 

@@ -14,7 +14,7 @@ plotICVarianceExplained(
 )
 }
 \arguments{
-\item{cica}{consICA compliant list with}
+\item{cica}{consICA compliant list}
 
 \item{sort}{specify the arrangement as 'asc'/'desc'. No sorting if NULL}
 
@@ -42,6 +42,6 @@ For details on the computation see the help of the
 }
 \examples{
 data("samples_data")
-cica <- consICA(samples_data$X, ncomp=15, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=15, ntry=10, show.every=0)
 p <- plotICVarianceExplained(cica, sort = "asc")
 }

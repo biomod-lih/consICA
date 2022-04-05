@@ -44,7 +44,8 @@ Assigns extracted independent components to Gene Ontologies
 }
 \examples{
 data("samples_data")
-cica <- consICA(samples_data$X, ncomp=2, ntry=1, show.every=0)
+# cica <- consICA(samples_data, ncomp=40, ntry=1, show.every=0)
+cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) #exp timesave
 GOs <- getGO(cica, db = "BP")
 }
 \author{

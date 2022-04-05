@@ -19,7 +19,9 @@ consICA(
 )
 }
 \arguments{
-\item{X}{data matrix with features in rows and samples in columns}
+\item{X}{a `SummarizedExperiment` object. Assay used as data matrix with 
+features in rows and samples in columns. 
+See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
 
 \item{ncomp}{number of components.}
 
@@ -52,7 +54,7 @@ Default value is FALSE}
 }
 \value{
 a list with
-        \item{X}{input data}
+        \item{X}{input `SummarizedExperiment` object}
         \item{nsamples, nfeatures}{dimension of X}
         \item{S, M}{consensus metagene and weight matrix}
         \item{ncomp}{number of components}
@@ -67,9 +69,9 @@ calculate consensus independent component analysis (ICA)
 \examples{
 data("samples_data")
 # Deconvolve into independent components
-cica <- consICA(samples_data$X, ncomp=15, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=15, ntry=10, show.every=0)
 # X = S * M, where S - independent signals matrix, M - weights matrix
-dim(samples_data$X)
+dim(samples_data)
 dim(cica$S)
 dim(cica$M)
 }

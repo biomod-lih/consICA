@@ -1,6 +1,8 @@
 #' @title Calculate consensus Independent Component Analysis 
 #' @description calculate consensus independent component analysis (ICA) 
-#' @param X data matrix with features in rows and samples in columns
+#' @param X a `SummarizedExperiment` object. Assay used as data matrix with 
+#' features in rows and samples in columns. 
+#' See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
 #' @param ncomp number of components. 
 #' @param ntry number of consensus runs. Default value is 1
 #' @param show.every numeric logging period in iterations (disabled for 
@@ -21,7 +23,7 @@
 #' @param verbose logic TRUE or FALSE. Use TRUE for print process steps. 
 #'     Default value is FALSE
 #' @return a list with
-#'         \item{X}{input data}
+#'         \item{X}{input `SummarizedExperiment` object}
 #'         \item{nsamples, nfeatures}{dimension of X}
 #'         \item{S, M}{consensus metagene and weight matrix}
 #'         \item{ncomp}{number of components}
@@ -33,9 +35,9 @@
 #' @examples 
 #' data("samples_data")
 #' # Deconvolve into independent components
-#' cica <- consICA(samples_data$X, ncomp=15, ntry=10, show.every=0)
+#' cica <- consICA(samples_data, ncomp=15, ntry=10, show.every=0)
 #' # X = S * M, where S - independent signals matrix, M - weights matrix
-#' dim(samples_data$X)
+#' dim(samples_data)
 #' dim(cica$S)
 #' dim(cica$M)
 #' @seealso \code{\link[fastICA]{fastICA}}
@@ -50,6 +52,8 @@
 #' plot.window points polygon rect text title
 #' @importFrom grDevices dev.off pdf
 #' @importFrom stats aov cor density mad median p.adjust pnorm quantile rexp
+#' @importFrom SummarizedExperiment assay colData
+
 consICA <- function(X, 
                     ncomp=10,
                     ntry=1,
@@ -61,12 +65,13 @@ consICA <- function(X,
                     fun="logcosh",
                     alg.typ="deflation",
                     verbose = FALSE){
-    X <- as.matrix(X)
+    Xse <- X
+    X <- as.matrix(assay(X))
     if (!is.null(filter.thr)) X = X[apply(X,1,max)>filter.thr,]
     # if(nrow(X) == 0) {cat(X is epmpty);return NULL}
     
     Res <- list() # output
-    Res$X <- X
+    Res$X <- Xse
     S <- list()
     M <- list()
     
@@ -257,7 +262,9 @@ consICA <- function(X,
 #' @title Runs \code{\link[fastICA]{fastICA}}
 #' @description Runs \code{\link[fastICA]{fastICA}} once and store in a 
 #' consICA manner
-#' @param X matrix with features in rows and samples in columns
+#' @param X a `SummarizedExperiment` object. Assay used as data matrix with 
+#' features in rows and samples in columns. 
+#' See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
 #' @param ncomp number of components. Default value is 10
 #' @param filter.thr filter rows in input matrix with max value > `filter.thr`.
 #' Default value is NULL
@@ -269,14 +276,14 @@ consICA <- function(X,
 #' at a time. if alg.typ == "parallel" the components are extracted 
 #' simultaneously. Default value is "deflation"
 #' @return a list with
-#'         X - data
-#'         nsples, nfeatures - dimentions of X
-#'         S, M - consensus metagene and weight matrix
-#'         ncomp - number of components
+#'         \item{X}{input `SummarizedExperiment` object}
+#'         \item{nsamples, nfeatures}{dimension of X assay}
+#'         \item{S, M}{consensus metagene and weight matrix}
+#'         \item{ncomp}{number of components}
 #' @author Petr V. Nazarov
 #' @examples 
 #' data("samples_data")
-#' res <- oneICA(samples_data$X)
+#' res <- oneICA(samples_data)
 #' @seealso \code{\link[fastICA]{fastICA}}
 #' @export
 oneICA = function(X,
@@ -285,13 +292,14 @@ oneICA = function(X,
                   reduced=FALSE, 
                   fun="logcosh", 
                   alg.typ="deflation"){ 
-    
+    Xse <- X
+    X <- as.matrix(assay(X))    
     Res <- list()
     
     ## create containers
     X <- as.matrix(X)
     if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr,]
-    if (!reduced) Res$X <- X
+    if (!reduced) Res$X <- Xse
     
     ## matrix of signal
     Res$S <- matrix(nrow=nrow(X),ncol=ncomp)

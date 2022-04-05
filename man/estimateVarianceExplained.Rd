@@ -9,8 +9,8 @@ estimateVarianceExplained(cica, X = NULL)
 \arguments{
 \item{cica}{list compliant to `consICA()` result}
 
-\item{X}{input matrix used for the model. Will be used if consICA$X is NULL,
-ignore otherwise.}
+\item{X}{a `SummarizedExperiment` object. Assay  used for the model. 
+Will be used if consICA$X is NULL, ignore otherwise.}
 }
 \value{
 a list of:\cr
@@ -28,6 +28,6 @@ input (X-mean(X)) and (S*M)
 }
 \examples{
 data("samples_data")
-cica <- consICA(samples_data$X, ncomp=15, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=15, ntry=10, show.every=0)
 var_ic <- estimateVarianceExplained(cica)
 }
