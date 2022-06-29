@@ -1,0 +1,8 @@
+# CHANGES IN VERSION 0.99.1
+
+* fix Notes 
+* add unit tests
+
+# CHANGES IN VERSION 0.99.0
+
+* Submit to Bioconductor.
