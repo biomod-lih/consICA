@@ -13,7 +13,7 @@
 #' @return a list with
 #'     \item{cox.model}{an object of class `coxph` representing the fit. 
 #' See `coxph.object` for details}
-#'     \item{hazard.score}{hazard score for significant components (fdr < `frd` 
+#'     \item{hazard.score}{hazard score for significant components (fdr < `fdr` 
 #'     in individual cox model)}
 #' @examples
 #' data("samples_data")
@@ -22,7 +22,8 @@
 #' surv <- survivalAnalysis(cica, 
 #'   surv = SummarizedExperiment::colData(samples_data)[,c("time", "event")]) 
 #' @export
-#' @import survival
+#' @importFrom survival coxph survfit Surv
+# @import survival
 survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    
    if(!is.null(time) & !is.null(event)){
@@ -44,7 +45,7 @@ survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    }
    ResR$Stab <- apply(IC$stab,2,mean)
    
-   for (icomp in 1:nrow(IC$M)){
+   for (icomp in seq.int(1,nrow(IC$M))){
      model <- coxph(Surv(time=surv$time, event=surv$event)~ZM[icomp,])
      ResR$Pval[icomp] <- summary(model)$logtest["pvalue"]
      ResR[icomp,c("LHR","LHRmin","LHRmax")] <- 
@@ -65,7 +66,7 @@ survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    ## calculate hazard score
    score <- d
    i<- 1
-   for (i in 1:length(score)){
+   for (i in seq.int(1,length(score))){
      score[[i]] <- double(ncol(ZM))*0
      names(score[[i]]) <- colnames(ZM)
      j<-1
@@ -73,7 +74,7 @@ survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
        score[[i]] <- score[[i]] + d[[i]][comp] * R2[j] * ZM[j,] 
        j<-j+1
      }
-     #score[[i]] <- score[[i]] / length(d[[i]])
+     
    }
   
    i <- !is.na(surv$time)
@@ -92,6 +93,6 @@ survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    
    print(cox.train)
    return(list("cox.model" = cox.train,
-               "hazard.score" = d))
- }
+               "hazard.score" = d$surv))
+}
  

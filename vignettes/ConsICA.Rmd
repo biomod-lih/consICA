@@ -4,8 +4,6 @@ author: Petr V. Nazarov, Tony Kaoma, Maryna Chepeleva
 date: "`r Sys.Date()`"
 output: BiocStyle::html_document
 package: consICA
-abstract: |
-  Independent component analysis (ICA) of omics data can be used for deconvolution of biological signals and technical biases, correction of batch effects, feature engineering for classification and integration of the data [1]. The consICA package allows building robust consensus ICA-based deconvolution of the data as well as running post-hoc biological interpretation of the results. The implementation of parallel computing in the package ensures efficient analysis using modern multicore systems.
 vignette: |
   %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{The consICA package: User’s manual}
@@ -20,6 +18,9 @@ knitr::opts_chunk$set(
 ```
 
 <font size="2">This document describes the usage of the functions integrated into the package and is meant to be a reference document for the end-user. </font>
+
+# Introduction
+Independent component analysis (ICA) of omics data can be used for deconvolution of biological signals and technical biases, correction of batch effects, feature engineering for classification and integration of the data [1]. The consICA package allows building robust consensus ICA-based deconvolution of the data as well as running post-hoc biological interpretation of the results. The implementation of parallel computing in the package ensures efficient analysis using modern multicore systems.
 
 # Installing and loading the package
 Load the package with the following command:

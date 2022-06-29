@@ -13,7 +13,7 @@ saveReport(
   genenames = NULL,
   file = sprintf("report_ICA_\%d.pdf", ncol(IC$S)),
   main = "Component # \%d (stability = \%.3f)",
-  show.components = 1:ncol(IC$S)
+  show.components = seq.int(1, ncol(IC$S))
 )
 }
 \arguments{

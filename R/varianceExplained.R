@@ -19,7 +19,7 @@
 #' @export
 estimateVarianceExplained <- function(cica, X=NULL) {
     if(!is.consICA(cica))  return (NULL)
-    if(!is.null(cica$X))  X<-cica$X
+    if(!is.null(cica$X))  X <- cica$X
     if(is.null(X))  return (NULL)
     
     X <- as.matrix(assay(X))
@@ -33,15 +33,14 @@ estimateVarianceExplained <- function(cica, X=NULL) {
     
     R2 <- 1 - (sum(( Xn - S %*% M )^2, na.rm=TRUE)/denom)
     
-    ### could be parallelized 
-    R2_ic <- 1 - vapply(FUN.VALUE = 0, #/mc
-        1:ncol(S),
+    R2_ic <- 1 - vapply(FUN.VALUE = 0, 
+        seq.int(1,ncol(S)),
         function(ic)
             sum((Xn - matrix(S[,ic],ncol=1) %*% matrix(M[ic,],nrow=1) )^2, 
                 na.rm=TRUE)/denom
     )
     names(R2_ic) <- colnames(S)
-    return(list(R2=R2,R2_ics = R2_ic))
+    return(list(R2=R2,R2_ics=R2_ic))
 }
 
 #' @title Barplot variance explained by each IC
@@ -83,15 +82,15 @@ plotICVarianceExplained <- function(cica,
     
     if(!is.null(sort)){
         if(sort == "asc")
-            r2_ics = sort(r2_ics,decreasing = FALSE)
+            r2_ics <- sort(r2_ics,decreasing = FALSE)
         if(sort == "desc")
-            r2_ics = sort(r2_ics,decreasing = TRUE)
+            r2_ics <- sort(r2_ics,decreasing = TRUE)
     }
     
     if(is.null(x.cex)){
         p <- barplot(r2_ics,main=title,las=las, ...)
     } else{
-        p = barplot(r2_ics,main=title,las=las,xaxt="n", ...)
+        p <- barplot(r2_ics,main=title,las=las,xaxt="n", ...)
         axis(side = 1,at=p,tick = FALSE,labels = names(r2_ics),
              las=2,cex.axis=x.cex)
     }

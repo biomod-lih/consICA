@@ -14,13 +14,13 @@
 #' @examples
 #' data("samples_data")
 #' # Get deconvolution of X matrix
-#' RES <-  consICA(samples_data, ncomp=10, ntry=1, show.every=0)
+#' cica <-  consICA(samples_data, ncomp=10, ntry=1, show.every=0)
 #' # Get features names and FDR for each component
-#' features <- getFeatures(RES)
+#' features <- getFeatures(cica)
 #' # Positive affecting features for first components are
 #' ic1_pos <- features$ic.1$pos
 #' @export
-getFeatures = function(cica, alpha = 0.05, sort = FALSE){
+getFeatures <- function(cica, alpha = 0.05, sort = FALSE){
     if(!is.consICA(cica)) return (NULL)
     if(alpha >= 1 | alpha <= 0) return(NULL)
     
@@ -49,6 +49,34 @@ getFeatures = function(cica, alpha = 0.05, sort = FALSE){
                 )
         )
     }
+    
+    # Features1 <- lapply(cica$S, function(S) {
+    #   z  <- S[,icomp]
+    #   z  <- (z - median(z)) / mad(z)
+    #   pv <- pnorm(z)
+    #   pv[pv>0.5] <- 1-pv[pv>0.5]
+    #   fdr <- p.adjust(pv,method="BH")
+    #   fdr.pos <- fdr
+    #   fdr.neg <- fdr
+    #   fdr.pos[fdr > alpha | z<0]=1
+    #   fdr.neg[fdr > alpha | z>0]=1
+    #   features <- rownames(cica$S)
+    #   Features[[icomp]]<- list(
+    #     pos = data.frame(
+    #       features = features[fdr.pos<1],
+    #       fdr = fdr[fdr.pos<1],
+    #       stringsAsFactors=FALSE
+    #     ),
+    #     neg = data.frame(
+    #       features = features[fdr.neg<1],
+    #       fdr = fdr[fdr.neg<1],
+    #       stringsAsFactors=FALSE
+    #     )
+    #   )
+      
+    #})
+    
+    
     if(sort){
       Features <- sortFeatures(Features)
     }

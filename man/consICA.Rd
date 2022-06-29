@@ -11,6 +11,7 @@ consICA(
   show.every = 1,
   filter.thr = NULL,
   ncores = 1,
+  bpparam = NULL,
   reduced = FALSE,
   exclude = TRUE,
   fun = "logcosh",
@@ -35,6 +36,8 @@ from `X`}
 
 \item{ncores}{number of cores to be set for parallel calculation. Default 
 value is 1}
+
+\item{bpparam}{parameters from the `BiocParallel`}
 
 \item{reduced}{If TRUE returns reduced result (no `X`, `i.best`, 
 see 'return')}

@@ -29,13 +29,14 @@ Description: consICA implements a data-driven deconvolution method – consensus
   The implementation of parallel computing in the package ensures efficient 
   analysis of modern multicore systems.
 BugReports: https://github.com/biomod-lih/consICA/issues
-License: Artistic-2.0
+License: MIT
 Encoding: UTF-8
 LazyData: false
-Imports: fastICA (>= 1.2.1), parallel (>= 3.5.2), doSNOW (>= 1.0.16), 
+Imports: fastICA (>= 1.2.1), 
     sm, org.Hs.eg.db,GO.db, stats, SummarizedExperiment,
-    pheatmap,doMC,gplots,survival, topGO, graphics, grDevices
+    BiocParallel, graph, methods,
+    pheatmap, survival, topGO, graphics, grDevices
 Depends: R (>= 4.1.0)
-Suggests: knitr, BiocStyle, rmarkdown
+Suggests: knitr, BiocStyle, rmarkdown, testthat
 VignetteBuilder: knitr
 RoxygenNote: 7.1.2

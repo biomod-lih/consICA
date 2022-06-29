@@ -51,7 +51,7 @@ is.consICA <- function(cica){
 sortDataFrame <- function(x, key, ...) {
     if (missing(key)) {
         rn <- rownames(x)
-        if (all(rn %in% 1:nrow(x))) rn <- as.numeric(rn)
+        if (all(rn %in% seq.int(1,nrow(x)))) rn <- as.numeric(rn)
         x[order(rn, ...), , drop=FALSE]
     } else {
         x[do.call("order", c(x[key], ...)), , drop=FALSE]
@@ -70,95 +70,92 @@ sortDataFrame <- function(x, key, ...) {
 #' #                                 "fdr" = c(0, 0.1, 0.9))))
 #' #sortFeatures(features)
 sortFeatures <- function(Genes){
-  ncomp = length(Genes)
-  for (icomp in 1:ncomp){
+  ncomp <- length(Genes)
+  for (icomp in seq.int(1,ncomp)){
     for (direct in c("neg","pos"))
       if (nrow(Genes[[icomp]][[direct]])>1)
-        Genes[[icomp]][[direct]] = sortDataFrame(Genes[[icomp]][[direct]],"fdr")
+        Genes[[icomp]][[direct]]<-sortDataFrame(Genes[[icomp]][[direct]],"fdr")
   }
   return(Genes)
 }
 
-
-getTopIdx=function(x,n){
-  return(order(x,na.last=TRUE,decreasing=TRUE)[1:n])
+getTopIdx <- function(x,n){
+  return(order(x,na.last=TRUE,decreasing=TRUE)[seq.int(1,n)])
 }
 
 ## Draw a table to graphical window
 drawTable <- function(data,x0=0,y0=1,dx=0.2,dy=0.05,row.names=TRUE,
                       cex=1,col=1,new=TRUE, bg=NA, float.format = "%.2e"){
-  if (is.matrix(data)) data = data.frame(data,check.names = FALSE)
+  if (is.matrix(data)) data <- data.frame(data,check.names = FALSE,
+                                          stringsAsFactors = FALSE)
   ## factor->character
-  for (i in 1:ncol(data))
-    if (is.factor(data[,i])) 
-      data[,i]= as.character(data[,i])
+  i <- vapply(data, is.factor, FUN.VALUE = logical(1))
+  data[i] <- lapply(data[i], as.character)  
   ## Make character table Tab from data 
-  Tab=data.frame(matrix(nrow = nrow(data)+1, 
+  Tab <- data.frame(matrix(nrow = nrow(data)+1, 
                         ncol = ifelse(row.names,ncol(data)+1,ncol(data))))
-  if (row.names) {
-    Tab[-1,1] = rownames(data)
-    Tab[1,1] = ""
-    Tab[1,-1]=names(data)
-    Tab[-1,-1]=data
+  if (row.names) { # -/mc
+    Tab[-1,1] <- rownames(data)
+    Tab[1,1] <- ""
+    Tab[1,-1]<-names(data) #
+    Tab[-1,-1]<-data
     if (!is.null(float.format)){
-      for (i in 1:ncol(data)){
-        if (class(data[[i]])%in%c("numeric","double")){
+      for (i in seq.int(1,ncol(data))){
+        if (is.numeric(data[[i]])){
           if (is.data.frame(Tab[-1,-1])){
-            Tab[-1,-1][,i] = sprintf(float.format,data[[i]])
+            Tab[-1,-1][,i] <- sprintf(float.format,data[[i]])
           }else{
-            Tab[-1,-1] = sprintf(float.format,data[[i]])
+            Tab[-1,-1] <- sprintf(float.format,data[[i]])
           }
         }
       }
     }
   } else {
-    Tab[1,]=names(data)
-    Tab[-1,]=data
+    Tab[1,]<-names(data)
+    Tab[-1,]<-data
     if (!is.null(float.format))
-      for (i in 1:ncol(data))
-        if (class(data[[i]])%in%c("numeric","double"))
-          Tab[-1,][,i] = sprintf(float.format,data[[i]])
-    ##add check for 1 column!
+      for (i in seq.int(1,ncol(data)))
+        if (is.numeric(data[[i]]))
+          Tab[-1,][,i] <- sprintf(float.format,data[[i]])
   }
   
-  x = double(ncol(Tab))
-  y = double(nrow(Tab))
+  x <- double(ncol(Tab))
+  y <- double(nrow(Tab))
   ## check and elongate dx (if needed)
   if (length(dx) < length(x[-1])) 
-    x = c(0,dx[-length(dx)],rep(dx[length(dx)],ncol(Tab)-length(dx)))
+    x <- c(0,dx[-length(dx)],rep(dx[length(dx)],ncol(Tab)-length(dx)))
   if (length(dx) > length(x[-1])) 
-    x = c(0,dx[1:(length(x)-1)])
+    x <- c(0,dx[seq.int(1,(length(x)-1))])
   if (length(dx) == length(x[-1])) 
-    x = c(0,dx)
+    x <- c(0,dx)
   ## check and elongate dy (if needed)
   if (length(dy) < nrow(Tab)-1) 
-    y = c(0,dy[-length(dy)],rep(dy[length(dy)],nrow(Tab)-length(dy)))
+    y <- c(0,dy[-length(dy)],rep(dy[length(dy)],nrow(Tab)-length(dy)))
   if (length(dy) > length(y[-1])) 
-    y[-1] = dy[1: length(y[-1])]
+    y[-1] <- dy[seq.int(1,length(y[-1]))]
   if (length(dy) == length(y[-1]))
-    y[-1] = dy
+    y[-1] <- dy
   ## check and elongate (in 2 dim) colors
   if (length(col) < ncol(Tab)*nrow(Tab)) {
-    col = rep(col,ncol(Tab)*nrow(Tab))
+    col <- rep(col,ncol(Tab)*nrow(Tab))
   }
   
-  x = cumsum(x) + x0
-  y = y0 - cumsum(y)
+  x <- cumsum(x) + x0
+  y <- y0 - cumsum(y)
   
   if (!new) 
     plot.new()
-  #if (0) library(grDevices)
-  k=1;iy=1;ix=1
-  for (iy in 1:nrow(Tab)){
+  k<-1;iy<-1;ix<-1
+  for (iy in seq.int(1,nrow(Tab))){
     if (y[iy]<mean(dy)){
-      y[iy:nrow(Tab)] = y[iy:nrow(Tab)] + 1 - y[iy]
+      y[seq.int(iy,nrow(Tab))] <- y[seq.int(iy,nrow(Tab))] + 1 - y[iy]
       plot.new()
     }
-    for (ix in 1:ncol(Tab)){
+    for (ix in seq.int(1,ncol(Tab))){
       if (!is.na(bg)) rect(x[ix],y[iy], 1.05,y[iy]-mean(dy),col=bg,border=NA)
       text(x[ix],y[iy],Tab[iy,ix],adj=c(0,1),cex=cex,col=col[k],
            font = ifelse((ix==1 && row.names)|(iy==1),2,1))
-      k=k+1
+      k<-k+1
     }
   }
 }
@@ -169,8 +166,7 @@ violinplot<-function (x, ...,xlab="",ylab="", main="", range = 1.5, h = NULL,
                       border = "black", lty = 1, 
                       lwd = 1, rectCol = "black", colMed = "white", 
                       pchMed = 19, 
-                      at, add = FALSE, wex = 1, drawRect = TRUE, cex.axis = 1) 
-{
+                      at, add = FALSE, wex = 1, drawRect = TRUE, cex.axis = 1){
   if(!is.list(x)){
     datas <- list(x, ...)
   } else{
@@ -178,7 +174,7 @@ violinplot<-function (x, ...,xlab="",ylab="", main="", range = 1.5, h = NULL,
   }
   n <- length(datas)
   if (missing(at)) 
-    at <- 1:n
+    at <- seq.int(1,n)
   upper <- vector(mode = "numeric", length = n)
   lower <- vector(mode = "numeric", length = n)
   q1 <- vector(mode = "numeric", length = n)
@@ -190,7 +186,7 @@ violinplot<-function (x, ...,xlab="",ylab="", main="", range = 1.5, h = NULL,
   args <- list(display = "none")
   if (!(is.null(h))) 
     args <- c(args, h = h)
-  for (i in 1:n) {
+  for (i in seq.int(1,n)) {
     data <- datas[[i]]
     data.min <- min(data)
     data.max <- max(data)
@@ -235,7 +231,7 @@ violinplot<-function (x, ...,xlab="",ylab="", main="", range = 1.5, h = NULL,
       axis(1, at = at, labels = label, las = 2,cex.axis=cex.axis  )
     }
     box()
-    for (i in 1:n) {
+    for (i in seq.int(1,n)) {
       polygon(c(at[i] - height[[i]], rev(at[i] + height[[i]])), 
               c(base[[i]], rev(base[[i]])), col = col, border = border, 
               lty = lty, lwd = lwd)
@@ -255,7 +251,7 @@ violinplot<-function (x, ...,xlab="",ylab="", main="", range = 1.5, h = NULL,
       axis(2, at = at, labels = label,cex.axis=cex.axis )
     }
     box()
-    for (i in 1:n) {
+    for (i in seq.int(1,n)) {
       polygon(c(base[[i]], rev(base[[i]])), c(at[i] - height[[i]], 
                                               rev(at[i] + height[[i]])), 
               col = col, border = border, 
@@ -274,14 +270,41 @@ violinplot<-function (x, ...,xlab="",ylab="", main="", range = 1.5, h = NULL,
   title(main,xlab=xlab,ylab=ylab)
 }
 
-num2fact <- function(x, nlev = 4,digits=1){
-  if (!class(x) %in% c("numeric","double","integer")) return(factor(x))
-  f = rep(ifelse(digits==1,sprintf("q%d",1),sprintf("q%02d",1)),length(x))
-  thr = quantile(x,seq(1/nlev,1,by = 1/nlev),na.rm=TRUE)
-  for (ilev in 2:nlev)
-    f[x > thr[ilev-1]] = ifelse(digits==1,sprintf("q%d",ilev),
+num2fact <- function(x, nlev = 4, digits=1){
+  if (!is.numeric(x)) return(factor(x))
+  f <- rep(ifelse(digits==1,sprintf("q%d",1),sprintf("q%02d",1)),length(x))
+  thr <- quantile(x,seq(1/nlev,1,by = 1/nlev),na.rm=TRUE)
+  for (ilev in seq.int(2,nlev))
+    f[x > thr[ilev-1]] <- ifelse(digits==1,sprintf("q%d",ilev),
                                 sprintf("q%02d",ilev))
-  f[is.na(x)]=NA
-  f=factor(f)
+  f[is.na(x)] <- NA
+  f <- factor(f)
   return(f)
+}
+
+#' Set up for the parallel computing for biocParallel
+#' Adapt from `FEAST`
+#' This function sets up the environment for parallel computing.
+#' @param ncores number of processors
+#' @param BPPARAM bpparameter from bpparam
+#' @return BAPPARAM settings
+set_bpparam <- function(ncores = 0, BPPARAM = NULL)
+{
+  if (is.null(BPPARAM)) {
+    if (ncores != 0) {
+      if (.Platform$OS.type == "windows") {
+        result <- SnowParam(workers = ncores)
+      }
+      else {
+        result <- MulticoreParam(workers = ncores)
+      }
+    }
+    else {
+      result <- bpparam()
+    }
+    return(result)
+  }
+  else {
+    return(BPPARAM)
+  }
 }

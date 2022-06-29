@@ -26,88 +26,84 @@
 #' cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) #exp timesave
 #' GOs <- getGO(cica, db = "BP")
 #' @export
-getGO = function(IC,
-                 alpha = 0.05, 
+getGO <- function(IC,
+                 alpha=0.05, 
                  genenames=NULL, 
                  genome="org.Hs.eg.db",
-                 db = c("BP", "CC", "MF")){
+                 db=c("BP", "CC", "MF")){
   
-  is_bp <- ifelse("BP" %in% db, TRUE, FALSE)
-  is_cc <- ifelse("CC" %in% db, TRUE, FALSE)
-  is_mf <- ifelse("MF" %in% db, TRUE, FALSE)
+  is_bp <- "BP" %in% db
+  is_cc <- "CC" %in% db
+  is_mf <- "MF" %in% db
   
-  Genes = list()
-  if(is_bp)GOBP = list()
-  if(is_cc)GOCC = list()
-  if(is_mf)GOMF = list()
+  Genes <- list()
+  if(is_bp)GOBP <- list()
+  if(is_cc)GOCC <- list()
+  if(is_mf)GOMF <- list()
 
   if(!(is_bp | is_cc | is_mf)){
-    cat("Check db parameter!\n")
+    message("Check db parameter!\n")
     return(NULL)
   }
   
-  icomp=1
-  for (icomp in 1:ncol(IC$S)){
-    pv = pnorm(IC$S[,icomp],mean=median(IC$S[,icomp]),sd=mad(IC$S[,icomp]))
-    pv[pv>0.5] = 1-pv[pv>0.5]
-    fdr=p.adjust(pv,method="BH")
-    fdr.pos = fdr
-    fdr.neg = fdr
-    fdr.pos[fdr>alpha | scale(IC$S[,icomp])<0]=1
-    fdr.neg[fdr>alpha | scale(IC$S[,icomp])>0]=1
+  icomp <- 1
+  for (icomp in seq.int(1,ncol(IC$S))){
+    pv <- pnorm(IC$S[,icomp],mean=median(IC$S[,icomp]),sd=mad(IC$S[,icomp]))
+    pv[pv>0.5] <- 1-pv[pv>0.5]
+    fdr <- p.adjust(pv,method="BH")
+    fdr.pos <- fdr
+    fdr.neg <- fdr
+    fdr.pos[fdr>alpha | scale(IC$S[,icomp])<0] <- 1
+    fdr.neg[fdr>alpha | scale(IC$S[,icomp])>0] <- 1
     
     if (is.null(genenames)) {
-      genes = rownames(IC$S) 
+      genes <- rownames(IC$S) 
     }else{
       if(!is.null(names(genenames))){
-        genes = genenames[rownames(IC$S)]
+        genes <- genenames[rownames(IC$S)]
       }else{
-        genes = genenames
+        genes <- genenames
       }
     }
     
-    if(is_bp)GOBP[[sprintf("ic%02d",icomp)]] = list()
-    if(is_cc)GOCC[[sprintf("ic%02d",icomp)]] = list()
-    if(is_mf)GOMF[[sprintf("ic%02d",icomp)]] = list()
-    cat("----\nComponent",icomp,"----\n\n")
-    if(is_bp)GOBP[[icomp]]$pos = enrichGO(genes = genes,
+    if(is_bp)GOBP[[sprintf("ic%02d",icomp)]] <- list()
+    if(is_cc)GOCC[[sprintf("ic%02d",icomp)]] <- list()
+    if(is_mf)GOMF[[sprintf("ic%02d",icomp)]] <- list()
+    message("---- Component ",icomp," ----\n\n")
+    if(is_bp)GOBP[[icomp]]$pos <- enrichGO(genes = genes,
                                           fdr = fdr.pos,thr.fdr=alpha,db="BP",
                                           id= c("entrez", "ensembl", "symbol",
                                                 "genename"),
                                           genome=genome)
-    if(is_cc)GOCC[[icomp]]$pos = enrichGO(genes = genes,
+    if(is_cc)GOCC[[icomp]]$pos <- enrichGO(genes = genes,
                                           fdr = fdr.pos,thr.fdr=alpha,db="CC",
                                           id= c("entrez", "ensembl", "symbol", 
                                                 "genename"),
                                           genome=genome)
-    if(is_mf)GOMF[[icomp]]$pos = enrichGO(genes = genes,
+    if(is_mf)GOMF[[icomp]]$pos <- enrichGO(genes = genes,
                                           fdr = fdr.pos,thr.fdr=alpha,db="MF",
                                           id= c("entrez", "ensembl", "symbol", 
                                                  "genename"),
                                           genome=genome)
-    # cat("\n\nBP:",sum(GOBP[[icomp]]$pos$FDR<alpha),"enriched\n");
-    # cat("\n\nCC:",sum(GOCC[[icomp]]$pos$FDR<alpha),"enriched\n");
-    # cat("\n\nMF:",sum(GOMF[[icomp]]$pos$FDR<alpha),"enriched\n");
-    if(is_bp)GOBP[[icomp]]$neg = enrichGO(genes = genes,
+
+    if(is_bp)GOBP[[icomp]]$neg <- enrichGO(genes = genes,
                                           fdr = fdr.neg,thr.fdr=alpha,db="BP",
                                           id= c("entrez", "ensembl", "symbol", 
                                                 "genename"),
                                           genome=genome)
-    if(is_cc)GOCC[[icomp]]$neg = enrichGO(genes = genes,
+    if(is_cc)GOCC[[icomp]]$neg <- enrichGO(genes = genes,
                                           fdr = fdr.neg,thr.fdr=alpha,db="CC",
                                           id= c("entrez", "ensembl", "symbol", 
                                                 "genename"),
                                           genome=genome)
-    if(is_mf)GOMF[[icomp]]$neg = enrichGO(genes = genes,
+    if(is_mf)GOMF[[icomp]]$neg <- enrichGO(genes = genes,
                                           fdr = fdr.neg,thr.fdr=alpha,db="MF",
                                           id= c("entrez", "ensembl", "symbol", 
                                                 "genename"),
                                           genome=genome)
-    # cat("\n\nBP:",sum(GOBP[[icomp]]$neg$FDR<alpha),"enriched\n");
-    # cat("\n\nCC:",sum(GOCC[[icomp]]$neg$FDR<alpha),"enriched\n");
-    # cat("\n\nMF:",sum(GOMF[[icomp]]$neg$FDR<alpha),"enriched\n");
+
   }
-  GO = list()
+  GO <- list()
   if(is_bp) {
     GO <- append(GO, list(GOBP))
     names(GO) <- c(names(GO)[-length(names(GO))], "GOBP")

@@ -23,7 +23,7 @@ involved in final model. Default value is 0.05}
 a list with
     \item{cox.model}{an object of class `coxph` representing the fit. 
 See `coxph.object` for details}
-    \item{hazard.score}{hazard score for significant components (fdr < `frd` 
+    \item{hazard.score}{hazard score for significant components (fdr < `fdr` 
     in individual cox model)}
 }
 \description{

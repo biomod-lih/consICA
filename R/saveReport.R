@@ -26,13 +26,13 @@
 #' }
 #' saveReport(cica, GO=GOs, Var=samples_data$Var, surv = samples_data$Sur)
 #' @export
-#' @import gplots
-#' @import pheatmap
+# @import gplots
+#' @importFrom pheatmap pheatmap
 saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL, 
                       genenames=NULL,
                       file = sprintf("report_ICA_%d.pdf",ncol(IC$S)), 
                       main = "Component # %d (stability = %.3f)", 
-                      show.components = 1:ncol(IC$S)){
+                      show.components = seq.int(1,ncol(IC$S))){
   if(is.null(Genes)) Genes <- getFeatures(IC,alpha=0.01)
   if(!is.null(Var)) if (!is.data.frame(Var)) Var <- as.data.frame(Var)
   
@@ -42,20 +42,17 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
   
   ncomp <- ncol(IC$S)
   pdf(file,width=8.3, height=11.7,onefile=TRUE)
-  icomp<-1
-  for (icomp in 1:ncomp){
+  icomp <- 1
+  for (icomp in seq.int(1,ncomp)){
     for (direct in c("neg","pos"))
       if (nrow(Genes[[icomp]][[direct]])>1)
         Genes[[icomp]][[direct]] <- sortDataFrame(Genes[[icomp]][[direct]],
                                                   "fdr")
   }
   for (icomp in show.components){
-    #cat("Working with component #",icomp,"\n")
     par(mfcol=c(1,1),mar=c(3,3,2,1))
     plot.new()
     title(sprintf(main,icomp,mean(IC$stab[,icomp])),cex.main=0.8)
-    #title(bquote("Component #" ~ .(icomp) ~ "( mean"~ R^2 ~ "="~ .
-      #(sprintf("%.3f",mean(IC$stab[,icomp])))~")" ),cex.main=0.8)
     ## gene signature
     par(fig=c(0,0.2,0.85,1),new=TRUE,mar=c(2,2,2,1))
     plot(sort(IC$S[,icomp]),col = "#0000FF", type="l", ylab=("involvement"),
@@ -68,9 +65,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
     text(0,1,paste(nrow(Genes[[icomp]]$neg),"\nnegative"),font=2,adj=c(0,0),
          cex=0.5,col="#000088")
     if (nrow(Genes[[icomp]]$neg)>0){
-      txt = rownames(Genes[[icomp]]$neg)
-      if (!is.null(genenames)) txt = genenames[txt]
-      for (i in 1:nrow(Genes[[icomp]]$neg)) text(0,0.99-i/80,txt[i],
+      txt <- rownames(Genes[[icomp]]$neg)
+      if (!is.null(genenames)) txt <- genenames[txt]
+      for (i in seq.int(1,nrow(Genes[[icomp]]$neg))) text(0,0.99-i/80,txt[i],
                                                  col="#000088",adj=c(0,0),
                                                  cex=0.4)
     }
@@ -78,11 +75,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
     text(0.5,1,paste(nrow(Genes[[icomp]]$pos),"\npositive"),font=2,adj=c(0,0),
          cex=0.5,col="#880000")
     if (nrow(Genes[[icomp]]$pos)>0){
-      #for (i in 1:nrow(Genes[[icomp]]$pos)) text(0.5,1-i/60,
-        #Genes[[icomp]]$pos$genes[i],col="#880000",adj=c(0,0),cex=0.5)
-      txt = rownames(Genes[[icomp]]$pos)
-      if (!is.null(genenames)) txt = genenames[txt]
-      for (i in 1:nrow(Genes[[icomp]]$pos)) text(0.5,0.99-i/80,txt[i],
+      txt <- rownames(Genes[[icomp]]$pos)
+      if (!is.null(genenames)) txt <- genenames[txt]
+      for (i in seq.int(1,nrow(Genes[[icomp]]$pos))) text(0.5,0.99-i/80,txt[i],
                                               col="#880000",adj=c(0,0),cex=0.4)
     }
     
@@ -97,7 +92,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
         tab$FDR =sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:BP neg : %d terms(FDR<0.1)",nrow(tab)),
              col="#000088",font=2,adj=c(0,0),cex=0.6)
-        if (nrow(tab)>0) drawTable(tab[1:min(20,nrow(tab)),],x0=0,y0=0.98,
+        if (nrow(tab)>0) drawTable(tab[seq.int(1,min(20,nrow(tab))),],
+                                   x0=0,y0=0.98,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#000088")
         par(fig=c(0.6,1,0.7,1),new=TRUE,mar=c(2,2,2,0));plot.new()
@@ -106,7 +102,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
         tab$FDR =sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:BP pos : %d terms(FDR<0.1)",nrow(tab)),
              col="#880000",font=2,adj=c(0,0),cex=0.6)
-        if (nrow(tab)>0) drawTable(tab[1:min(20,nrow(tab)),],x0=0,y0=0.98,
+        if (nrow(tab)>0) drawTable(tab[seq.int(1,min(20,nrow(tab))),],
+                                   x0=0,y0=0.98,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#880000")
       }
@@ -117,7 +114,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
         tab$FDR =sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:CC neg : %d terms(FDR<0.1)",nrow(tab)),
              col="#000088",font=2,adj=c(0,0),cex=0.6)
-        if (nrow(tab)>0) drawTable(tab[1:min(10,nrow(tab)),],x0=0,y0=0.98,
+        if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],
+                                   x0=0,y0=0.98,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#000088")
         par(fig=c(0.6,1,0.506,0.806),new=TRUE,mar=c(2,2,2,0));plot.new()
@@ -126,7 +124,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
         tab$FDR =sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:CC pos : %d terms(FDR<0.1)",nrow(tab)),
              col="#880000",font=2,adj=c(0,0),cex=0.6)
-        if (nrow(tab)>0) drawTable(tab[1:min(10,nrow(tab)),],x0=0,y0=0.98,
+        if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],
+                                   x0=0,y0=0.98,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#880000")
       }      
@@ -137,7 +136,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
         tab$FDR =sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:MF neg : %d terms(FDR<0.1)",nrow(tab)),
              col="#000088",font=2,adj=c(0,0),cex=0.6)
-        if (nrow(tab)>0) drawTable(tab[1:min(10,nrow(tab)),],x0=0,y0=0.98,
+        if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],
+                                   x0=0,y0=0.98,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#000088")
         par(fig=c(0.6,1,0.397,0.697),new=TRUE,mar=c(2,2,2,0));plot.new()
@@ -146,7 +146,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
         tab$FDR =sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:MF pos : %d terms(FDR<0.1)",nrow(tab)),
              col="#880000",font=2,adj=c(0,0),cex=0.6)
-        if (nrow(tab)>0) drawTable(tab[1:min(10,nrow(tab)),],x0=0,y0=0.98,
+        if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],
+                                   x0=0,y0=0.98,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#880000")
       }   
@@ -154,8 +155,6 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
     
     ix = 1; iy = 1
     if (!is.null(surv)){
-      #cat("Survival\n")
-      #require("survival")
       par(fig=c(0.2+(ix-1)*0.2,0.2+ix*0.2,0.55-iy*0.2,0.55-(iy-1)*0.2),
           new=TRUE,mar=c(4,2,2,1))
       scoreD = c("low","high")[as.integer(IC$M[icomp,]>median(IC$M[icomp,]))+1]
@@ -174,10 +173,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
     
     if (!is.null(Var)){
       #td check whetehr factor is adequate (number of levels and NAs)
-      #cat("ANOVA\n")
       pv = double(ncol(Var))+1
       names(pv)= names(Var)
-      for (ifact in 1:ncol(Var)){
+      for (ifact in seq.int(1,ncol(Var))){
         fact = Var[[ifact]]
         ikeep = !is.na(fact)
         fact = as.factor(as.character(fact[ikeep]))
@@ -193,8 +191,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
       drawTable(tab,dx=c(0.8,0.2),dy=0.08,cex=0.5,row.names=FALSE,bg="white")
       ix=1; iy=2
       ifact=1
-      for (ifact in 1:min(8,length(pv))){
-        factname = names(pv)[ifact]
+      for (ifact in seq.int(1,min(8,length(pv)))){
+        factname <- names(pv)[ifact]
         fact = Var[[factname]]
         ikeep = !is.na(fact)
         fact = as.factor(as.character(fact[ikeep]))
@@ -206,7 +204,7 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
         
         x = IC$M[icomp,ikeep]
         xf = list()
-        for (i in 1:nlevels(fact)) xf[[i]] = x[fact == levels(fact)[i]]
+        for (i in seq.int(1,nlevels(fact))) xf[[i]] = x[fact == levels(fact)[i]]
         names(xf) = levels(fact)
         if (ix>4) {ix=1;iy=iy+1}
         par(fig=abs(c(0.2+(ix-1)*0.2,0.2+ix*0.2,0.6-iy*0.2,0.6-(iy-1)*0.2)),
@@ -229,10 +227,17 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
             subj="R2 between most correlates S in multiple runs")
   }
   if (!is.null(IC$mr2)) 
-    plot(density(IC$mr2),lwd=2,col="blue",
-         main="Distribution of mean R2\namong rows of M-matrix",
-         xlab="Mean R2 for each single run")
+    if(length(IC$mr2) > 1){
+      plot(density(IC$mr2),lwd=2,col="blue",
+           main="Distribution of mean R2\namong rows of M-matrix",
+           xlab="Mean R2 for each single run")
+    } else{
+      plot(x = IC$mr2, y = 1, lwd=2,col="blue",
+           main="Distribution of mean R2\namong rows of M-matrix",
+           ylab="Density",
+           xlab="Mean R2 for each single run")
+    }
   dev.off()
-  message(paste("Report saved to", file))
+  message("Report saved to ", file)
   return(TRUE)
 }

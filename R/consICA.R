@@ -11,6 +11,7 @@
 #' from `X` 
 #' @param ncores number of cores to be set for parallel calculation. Default 
 #' value is 1
+#' @param bpparam parameters from the `BiocParallel`
 #' @param reduced If TRUE returns reduced result (no `X`, `i.best`, 
 #' see 'return')
 #' @param exclude are samples excluded during multiple run? If TRUE one random 
@@ -43,16 +44,18 @@
 #' @seealso \code{\link[fastICA]{fastICA}}
 #' @export
 
-#' @import fastICA parallel doSNOW doMC
+#' @importFrom fastICA fastICA
+#' @import BiocParallel
 #' @import topGO org.Hs.eg.db 
 #' @import GO.db 
-# @import pheatmap 
+#' @importFrom graph nodeData
 #' @importFrom sm sm.density
 #' @importFrom graphics axis barplot box boxplot legend lines par plot.new 
 #' plot.window points polygon rect text title
 #' @importFrom grDevices dev.off pdf
 #' @importFrom stats aov cor density mad median p.adjust pnorm quantile rexp
 #' @importFrom SummarizedExperiment assay colData
+#' @importFrom methods new
 
 consICA <- function(X, 
                     ncomp=10,
@@ -60,16 +63,22 @@ consICA <- function(X,
                     show.every=1,
                     filter.thr=NULL, 
                     ncores=1,
+                    bpparam=NULL,
                     reduced=FALSE,
                     exclude=TRUE,
                     fun="logcosh",
                     alg.typ="deflation",
-                    verbose = FALSE){
+                    verbose=FALSE){
+  
+    if(!inherits (X, "SummarizedExperiment")){
+      message("X must be a SummarizedExperiment object")
+      return(NULL)
+    }
+  
     Xse <- X
     X <- as.matrix(assay(X))
-    if (!is.null(filter.thr)) X = X[apply(X,1,max)>filter.thr,]
-    # if(nrow(X) == 0) {cat(X is epmpty);return NULL}
-    
+    if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr,]
+
     Res <- list() # output
     Res$X <- Xse
     S <- list()
@@ -78,105 +87,103 @@ consICA <- function(X,
     ## metagenes  - matrix of features
     S[[1]] <- matrix(nrow=nrow(X),ncol=ncomp)
     rownames(S[[1]]) <- rownames(X)
-    colnames(S[[1]]) <- sprintf("ic.%d",1:ncomp)
+    colnames(S[[1]]) <- sprintf("ic.%d",seq.int(1,ncomp))
     
     ## mixing matrix - matrix of samples
     M[[1]] <- matrix(nrow=ncomp,ncol=ncol(X))
     colnames(M[[1]]) <- colnames(X)
-    rownames(M[[1]]) <- sprintf("ic.%d",1:ncomp)
+    rownames(M[[1]]) <- sprintf("ic.%d",seq.int(1,ncomp))
     
-    itry<-1
+    itry <- 1
     Res$S <- S[[1]]
     Res$M <- M[[1]]
-    #Res$mse <- NA  ## mean square error bw X and S*M
     Res$mr2 <- NA  ## mean correlation bw mixing profiles
-    #Res$n3 <- NA   ## mean number of elements in |S| over 3
     ## do multiple tries
-    idx.excludeSamples <- sample(1:ncol(X),ntry, replace = (ntry > ncol(X)))
+    idx.excludeSamples <- sample(seq.int(1,ncol(X)), 
+                                 ntry, replace = (ntry > ncol(X)))
     if (ntry==1 | (!exclude) ) idx.excludeSamples <- integer(0)
     itry <- 1
     
     ###############################
     ## Parallel section starts
     ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    if (ncores > 1) {
-       # require(foreach)
-        if(.Platform$OS.type=="unix") {
-            #require(doMC)
-            registerDoMC(ncores)
-        }
-        if(.Platform$OS.type=="windows") {
-            #require(doSNOW)
-            cl = makeCluster(ncores)
-            registerDoSNOW(cl)
-        }
-    }
-    
+
     if(verbose){
-      cat("*** Starting",ifelse(ncores>1,"parallel",""),"calculation on",
+      message("*** Starting ",ifelse(ncores>1,"parallel ",""),"calculation on ",
           ncores,"core(s)...\n")
-      cat("*** System:",.Platform$OS.type,"\n")
-      cat("***",ncomp,"components,",ntry,"runs,",nrow(X),"features,",
+      message("*** System: ",.Platform$OS.type,"\n")
+      message("***",ncomp," components, ",ntry," runs, ",nrow(X)," features, ",
           ncol(X),"samples.\n")
-      cat("*** Start time:",as.character(Sys.time()),"\n")
+      message("*** Start time: ",as.character(Sys.time()),"\n")
     }
-    t0=Sys.time()
+    t0 <- Sys.time()
     ## multi run ICA
     if (ncores > 1) {
-        MRICA <- foreach(itry=1:ntry) %dopar% {
-            SP <- Res$S + NA
-            MP <- Res$M + NA
-            if (length(idx.excludeSamples) == 0){
-                ic <- fastICA::fastICA(X,n.comp=ncomp,alg.typ=alg.typ,fun=fun)
-                SP[,] <- ic$S
-                MP[,] <- ic$A
-            }else{
-                x <- X[,-idx.excludeSamples[itry]]
-                ic <- fastICA::fastICA(x,n.comp=ncomp,alg.typ=alg.typ,fun=fun)
-                SP[,] <- ic$S
-                MP[,-idx.excludeSamples[itry]] <- ic$A
-                MP[is.na(MP)] <- 0
-            }
-            gc()
-            return(list(S=SP,M=MP))
+      
+      par_fica <- function(x=x, Res=Res,Z,ncomp=ncomp,alg.typ=alg.typ,fun=fun,
+                           idx.excludeSamples=idx.excludeSamples){
+        suppressPackageStartupMessages({
+          requireNamespace("fastICA", include.only = c('fastICA')) #//////////////////////////
+        })
+
+        SP <- Res$S + NA
+        MP <- Res$M + NA
+
+        if (length(idx.excludeSamples) == 0){
+          ic <- fastICA(Z,n.comp=ncomp,alg.typ=alg.typ,fun=fun)
+          SP[,] <- ic$S
+          MP[,] <- ic$A
+        }else{
+          z <- Z[,-idx.excludeSamples[x]]
+          ic <- fastICA(z,n.comp=ncomp,alg.typ=alg.typ,fun=fun)
+          SP[,] <- ic$S
+          MP[,-idx.excludeSamples[x]] <- ic$A
+          MP[is.na(MP)] <- 0
         }
+        return(list(S=SP,M=MP))
+      }
+      
+      bp_param <- set_bpparam(ncores, BPPARAM = bpparam)
+      bp_param$progressbar = TRUE
+      seqntry <- seq.int(ntry)
+      MRICA <- bplapply(X=seqntry, FUN = par_fica, BPPARAM = bp_param,
+                        Res=Res,Z=X,ncomp=ncomp,alg.typ=alg.typ,fun=fun,
+                        idx.excludeSamples=idx.excludeSamples)
+
     }else{
       if(verbose){
-        cat(paste("Execute one-core analysis", 
-                  ifelse(show.every > 0, 
-                         paste("showing progress every",show.every,"run(s)\n"),
-                         "\n")))
+        m <-  ifelse(show.every > 0, 
+                     paste("showing progress every",show.every,"run(s)\n"),
+                     "\n")
+        message("Execute one-core analysis ", m)
       }
         
         MRICA <- list()
-        for(itry in 1:ntry){
+        for(itry in seq.int(1,ntry)){
             MRICA[[itry]] <- list()
             MRICA[[itry]]$S <- Res$S + NA
             MRICA[[itry]]$M <- Res$M + NA
             if (length(idx.excludeSamples) == 0){
-                ic <- fastICA(X, n.comp=ncomp, alg.typ=alg.typ ,fun=fun)
+                ic <- fastICA(X, n.comp=ncomp, alg.typ=alg.typ,fun=fun)
                 MRICA[[itry]]$S[,] <- ic$S
                 MRICA[[itry]]$M[,] <- ic$A
             }else{
                 x <- X[,-idx.excludeSamples[itry]]
-                ic <- fastICA(x, n.comp=ncomp, alg.typ=alg.typ ,fun=fun)
+                ic <- fastICA(x, n.comp=ncomp, alg.typ=alg.typ,fun=fun)
                 MRICA[[itry]]$S[,] <- ic$S
                 MRICA[[itry]]$M[,-idx.excludeSamples[itry]] <- ic$A
                 MRICA[[itry]]$M[is.na(MRICA[[itry]]$M)] <- 0
             }
             if (itry%%show.every == 0 & show.every > 0) {
-              if(verbose) cat("try #",itry,"of",ntry,"\n")
-                #flush.console()
+              if(verbose) message("try #",itry," of ",ntry,"\n")
             }
         }
     }
     
-    if(.Platform$OS.type=="windows" & ncores>1)  stopCluster(cl)
-    
     if(verbose){
-      cat("*** Done!", "\n")
-      cat("*** End time:",as.character(Sys.time()),"\n")
-      cat(Sys.time()-t0, "\n")
+      message("*** Done!", "\n")
+      message("*** End time:",as.character(Sys.time()),"\n")
+      message(Sys.time()-t0, "\n")
     }
    
     ## end of parallel section
@@ -186,49 +193,50 @@ consICA <- function(X,
     M <- lapply(MRICA,function(x)x$M)
     rm(MRICA)
     
-    ## this is for debugging reasons - save partial results
-    #if (!is.null(savecomp)) save(list=ls(),file=savecomp) # not for user/mc
-    
-    if(verbose) cat("Calculate ||X-SxM|| and r2 between component weights\n")
-    for (itry in 1:ntry){
-        #Res$mse[itry] <-sum(X -mean(X)-S[[itry]]%*%M[[itry]])^2/ncol(X)/nrow(X)
-        Res$mr2[itry] <- mean((cor(t(M[[itry]]))^2)[upper.tri(matrix(0,
-                                                                     nrow=ncomp,
-                                                                  ncol=ncomp))])
-        #Res$n3[itry] <- sum(apply(abs(S[[itry]])>3,2,sum))/ncomp
+    if(verbose) {
+      message("Calculate ||X-SxM|| and r2 between component weights\n")
     }
+    
+    for (itry in seq.int(1,ntry)){
+        Res$mr2[itry] <- mean((cor(t(M[[itry]]))^2)
+                              [upper.tri(matrix(0,nrow=ncomp,ncol=ncomp))])
+    }
+    
     ## who is the best: min correlated (hoping that we capture majority of 
     ## independent signals
     Res$i.best <- which.min(Res$mr2)
-    ## simply smallest error? #Res$i.best = which.min(Res$mse) - no!
-    if (length(Res$i.best) == 0 ) Res$i.best = 1
+    ## simply smallest error?
+    if (length(Res$i.best) == 0 ) Res$i.best <- 1
     ## if only one try - return
     if (ntry == 1) {
         Res$S <- S[[1]]
         Res$M <- M[[1]]
+        Res$ncomp  <- ncomp
+        Res$nsples <- ncol(X)
+        Res$nfeatures <- nrow(X)
         return(Res)
     }
     
     ## correlate results
     ## s.cor - to which ic of the BEST decomposition we should address?
-    if(verbose) cat("Correlate rows of S between tries\n")
+    if(verbose) message("Correlate rows of S between tries\n")
     s.cor <- matrix(nrow=ntry,ncol=ncomp)
-    s.cor[Res$i.best,] <- 1:ncomp
+    s.cor[Res$i.best,] <- seq.int(1,ncomp)
     itry <- 1
-    for (itry in (1:ntry)[-Res$i.best]) {
+    for (itry in seq.int(1,ntry)[-Res$i.best]) {
         r <- cor(S[[itry]],S[[Res$i.best]])
         s.cor[itry,] <- apply((r)^2,2,which.max)
-        for (ic in 1:ncomp)
+        for (ic in seq.int(1,ncomp))
             s.cor[itry,ic] <- s.cor[itry,ic] * sign(r[s.cor[itry,ic],ic])
     }
     ## build consensus S, M
     
-    if(verbose) cat("Build consensus ICA\n")
+    if(verbose) message("Build consensus ICA\n")
     Res$S[,] <- S[[1]]
     Res$M[,] <- M[[1]]
     itry<-2 # delete
-    for (itry in 2:ntry){ ## itry=2, because 1 is already there
-        for (ic in 1:ncomp) {
+    for (itry in seq.int(2,ntry)){ ## itry=2, because 1 is already there
+        for (ic in seq.int(1,ncomp)) {
             Res$S[,ic] <- Res$S[,ic] + S[[itry]][,abs(s.cor[itry,ic])]* 
                 sign(s.cor[itry,ic])
             Res$M[ic,] <- Res$M[ic,] + M[[itry]][abs(s.cor[itry,ic]),]* 
@@ -239,23 +247,22 @@ consICA <- function(X,
     Res$M <- Res$M / ntry
     
     ## use consensus S, M to analyze stability
-    if(verbose) cat("Analyse stability\n")
-    Res$stab = s.cor + NA
-    for (itry in (1:ntry)) {
+    if(verbose) message("Analyse stability\n")
+    Res$stab <- s.cor + NA
+    for (itry in seq.int(1,ntry)) {
         Res$stab[itry,] <- diag(cor(Res$S,S[[itry]][,abs(s.cor[itry,])])^2)
     }
     colnames(Res$stab) <- colnames(Res$S)
     
     if (reduced) {
-        Res$X = NULL
-        #Res$mse = NULL
-        Res$i.best = NULL
+        Res$X <- NULL
+        Res$i.best <- NULL
     }
     
     Res$ncomp  <- ncomp
     Res$nsples <- ncol(X)
     Res$nfeatures <- nrow(X)
-    if(verbose) cat("consensus ICA done\n")
+    if(verbose) message("consensus ICA done\n")
     return(Res)
 }
 
@@ -286,12 +293,18 @@ consICA <- function(X,
 #' res <- oneICA(samples_data)
 #' @seealso \code{\link[fastICA]{fastICA}}
 #' @export
-oneICA = function(X,
+oneICA <- function(X,
                   ncomp=10, 
                   filter.thr=NULL,
                   reduced=FALSE, 
                   fun="logcosh", 
                   alg.typ="deflation"){ 
+  
+    if(!inherits (X, "SummarizedExperiment")){
+      message("X must be a SummarizedExperiment object")
+      return(NULL)
+    }
+  
     Xse <- X
     X <- as.matrix(assay(X))    
     Res <- list()
@@ -304,12 +317,12 @@ oneICA = function(X,
     ## matrix of signal
     Res$S <- matrix(nrow=nrow(X),ncol=ncomp)
     rownames(Res$S) <- rownames(X)
-    colnames(Res$S) <- sprintf("ic.%d",1:ncomp)
+    colnames(Res$S) <- sprintf("ic.%d", seq.int(1,ncomp))
     
     ## mixing matrix
-    Res$M <- matrix(nrow=ncomp,ncol = ncol(X))
+    Res$M <- matrix(nrow=ncomp,ncol=ncol(X))
     colnames(Res$M) <- colnames(Res$X)
-    rownames(Res$M) <- sprintf("ic.%d",1:ncomp)
+    rownames(Res$M) <- sprintf("ic.%d", seq.int(1,ncomp))
     
     ## run fastICA
     ic <- fastICA(X, n.comp=ncomp, alg.typ=alg.typ, fun=fun)
