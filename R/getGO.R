@@ -69,7 +69,7 @@ getGO <- function(IC,
     if(is_bp)GOBP[[sprintf("ic%02d",icomp)]] <- list()
     if(is_cc)GOCC[[sprintf("ic%02d",icomp)]] <- list()
     if(is_mf)GOMF[[sprintf("ic%02d",icomp)]] <- list()
-    message("---- Component ",icomp," ----\n\n")
+    message("---- Component ",icomp," ----\n")
     if(is_bp)GOBP[[icomp]]$pos <- enrichGO(genes = genes,
                                           fdr = fdr.pos,thr.fdr=alpha,db="BP",
                                           id= c("entrez", "ensembl", "symbol",

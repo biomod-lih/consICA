@@ -13,7 +13,7 @@ enrichGO(
   thr.fc = NA,
   db = "BP",
   genome = "org.Hs.eg.db",
-  id = c("entrez", "alias", "ensembl", "symbol", "genename", "unigene"),
+  id = c("entrez", "alias", "ensembl", "symbol", "genename"),
   algorithm = "weight",
   do.sort = TRUE,
   randomFraction = 0,

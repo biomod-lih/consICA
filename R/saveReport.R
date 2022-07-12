@@ -42,13 +42,8 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
   
   ncomp <- ncol(IC$S)
   pdf(file,width=8.3, height=11.7,onefile=TRUE)
-  icomp <- 1
-  for (icomp in seq.int(1,ncomp)){
-    for (direct in c("neg","pos"))
-      if (nrow(Genes[[icomp]][[direct]])>1)
-        Genes[[icomp]][[direct]] <- sortDataFrame(Genes[[icomp]][[direct]],
-                                                  "fdr")
-  }
+  Genes <- sortFeatures(Genes)
+  
   for (icomp in show.components){
     par(mfcol=c(1,1),mar=c(3,3,2,1))
     plot.new()

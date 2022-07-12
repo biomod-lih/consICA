@@ -288,8 +288,7 @@ num2fact <- function(x, nlev = 4, digits=1){
 #' @param ncores number of processors
 #' @param BPPARAM bpparameter from bpparam
 #' @return BAPPARAM settings
-set_bpparam <- function(ncores = 0, BPPARAM = NULL)
-{
+set_bpparam <- function(ncores = 0, BPPARAM = NULL){
   if (is.null(BPPARAM)) {
     if (ncores != 0) {
       if (.Platform$OS.type == "windows") {
