@@ -123,7 +123,7 @@ consICA <- function(X,
       par_fica <- function(x=x, Res=Res,Z,ncomp=ncomp,alg.typ=alg.typ,fun=fun,
                            idx.excludeSamples=idx.excludeSamples){
         suppressPackageStartupMessages({
-          requireNamespace("fastICA", include.only = c('fastICA')) #//////////////////////////
+          requireNamespace("fastICA") 
         })
 
         SP <- Res$S + NA
@@ -197,10 +197,11 @@ consICA <- function(X,
       message("Calculate ||X-SxM|| and r2 between component weights\n")
     }
     
-    for (itry in seq.int(1,ntry)){
-        Res$mr2[itry] <- mean((cor(t(M[[itry]]))^2)
+    Res$mr2 <- vapply(seq.int(1,ntry), 
+                       function(itry){
+                         mean((cor(t(M[[itry]]))^2)
                               [upper.tri(matrix(0,nrow=ncomp,ncol=ncomp))])
-    }
+                       }, numeric(1))
     
     ## who is the best: min correlated (hoping that we capture majority of 
     ## independent signals
@@ -248,10 +249,10 @@ consICA <- function(X,
     
     ## use consensus S, M to analyze stability
     if(verbose) message("Analyse stability\n")
-    Res$stab <- s.cor + NA
-    for (itry in seq.int(1,ntry)) {
-        Res$stab[itry,] <- diag(cor(Res$S,S[[itry]][,abs(s.cor[itry,])])^2)
-    }
+    Res$stab <- t(vapply(seq.int(1,ntry), 
+                      function(itry){
+                        diag(cor(Res$S,S[[itry]][,abs(s.cor[itry,])])^2)
+                      }, numeric(ncomp)))
     colnames(Res$stab) <- colnames(Res$S)
     
     if (reduced) {

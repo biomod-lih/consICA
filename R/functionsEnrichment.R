@@ -23,7 +23,7 @@ enrichGO <- function(genes,
                     db="BP",
                     genome="org.Hs.eg.db", 
                     id = c("entrez", "alias", "ensembl", "symbol", 
-                           "genename", "unigene"),
+                           "genename"),
                     algorithm = "weight",
                     do.sort=TRUE,randomFraction=0,return.genes=FALSE){
 
@@ -38,20 +38,22 @@ enrichGO <- function(genes,
   ## prepare gene categories and score
   if (length(id)>1){ 
     ## if so - find the best, i.e. the one which is overrepresented
-    common <- integer(length(id))
-    names(common) <- id
-    for ( i in seq.int(1,length(id))){
-      #myGO2genes <- topGO::annFUN.org(whichOnto=db,mapping = genome,ID = id[i]) #>>>>>>>>>>vect
-      myGO2genes <- annFUN.org(whichOnto=db,mapping = genome,ID = id[i])
-      common[i] <- sum(genes %in% unique(unlist(myGO2genes)))
-    }
+    common <- vapply(id, 
+                      function(x_id){
+                        myGO2genes <- annFUN.org(whichOnto=db,mapping = genome,
+                                                 ID = x_id)
+                        sum(genes %in% unique(unlist(myGO2genes)))
+                      },
+                      FUN.VALUE = numeric(1))
+    
     id <- names(which.max(common))
     message("Checking DB. The best overlap with [",id,"] gene IDs:",
             max(common),"\n")
   }
-  #myGO2genes <- topGO::annFUN.org(whichOnto=db, mapping = genome, ID = id)
-  myGO2genes <- annFUN.org(whichOnto=db, mapping = genome, ID = id)
   
+  #?docker:myGO2genes <- topGO::annFUN.org(whichOnto=db, mapping=genome,ID=id)
+  myGO2genes <- annFUN.org(whichOnto=db, mapping = genome, ID = id)
+
   ## create topGOdata object
   GOdata = new("topGOdata",  ##constructor
                ontology = db,
@@ -108,14 +110,16 @@ get_score <- function(genes, fc, thr.fc, fdr, thr.fdr, ntop){
     if (is.na(ntop)){
       score[fdr>=thr.fdr]=0
     }else{
-      score[sort(score,index.return=TRUE,decreasing=TRUE)$ix[-(seq_along(ntop))]] <- 0
+      score[sort(score,index.return=TRUE,decreasing=TRUE)$ix[
+        -(seq_along(ntop))]] <- 0
     }
   }else{
     score = (-log10(fdr)*abs(fc))
     if (is.na(ntop)){
       score[fdr>=thr.fdr | abs(fc)<=thr.fc]=0
     }else{
-      score[sort(score,index.return=TRUE,decreasing=TRUE)$ix[-seq_along(ntop)]]=0
+      score[sort(score,index.return=TRUE,decreasing=TRUE)$ix[
+        -seq_along(ntop)]] <- 0
     }
   }
   names(score) <- genes

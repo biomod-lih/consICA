@@ -24,58 +24,31 @@ getFeatures <- function(cica, alpha = 0.05, sort = FALSE){
     if(!is.consICA(cica)) return (NULL)
     if(alpha >= 1 | alpha <= 0) return(NULL)
     
-    Features <- list()
-    for (icomp in colnames(cica$S)){
-        z  <- cica$S[,icomp]
-        z  <- (z - median(z)) / mad(z)
-        pv <- pnorm(z)
-        pv[pv>0.5] <- 1-pv[pv>0.5]
-        fdr <- p.adjust(pv,method="BH")
-        fdr.pos <- fdr
-        fdr.neg <- fdr
-        fdr.pos[fdr > alpha | z<0]=1
-        fdr.neg[fdr > alpha | z>0]=1
-        features <- rownames(cica$S)
-        Features[[icomp]]<- list(
-            pos = data.frame(
-                    features = features[fdr.pos<1],
-                    fdr = fdr[fdr.pos<1],
-                    stringsAsFactors=FALSE
-                ),
-            neg = data.frame(
-                    features = features[fdr.neg<1],
-                    fdr = fdr[fdr.neg<1],
-                    stringsAsFactors=FALSE
-                )
+    Features <- lapply(colnames(cica$S), function(icomp, S = cica$S) {
+      z  <- S[,icomp]
+      z  <- (z - median(z)) / mad(z)
+      pv <- pnorm(z)
+      pv[pv>0.5] <- 1-pv[pv>0.5]
+      fdr <- p.adjust(pv,method="BH")
+      fdr.pos <- fdr
+      fdr.neg <- fdr
+      fdr.pos[fdr > alpha | z<0]=1
+      fdr.neg[fdr > alpha | z>0]=1
+      features <- rownames(cica$S)
+      list(
+        pos = data.frame(
+          features = features[fdr.pos<1],
+          fdr = fdr[fdr.pos<1],
+          stringsAsFactors=FALSE
+        ),
+        neg = data.frame(
+          features = features[fdr.neg<1],
+          fdr = fdr[fdr.neg<1],
+          stringsAsFactors=FALSE
         )
-    }
-    
-    # Features1 <- lapply(cica$S, function(S) {
-    #   z  <- S[,icomp]
-    #   z  <- (z - median(z)) / mad(z)
-    #   pv <- pnorm(z)
-    #   pv[pv>0.5] <- 1-pv[pv>0.5]
-    #   fdr <- p.adjust(pv,method="BH")
-    #   fdr.pos <- fdr
-    #   fdr.neg <- fdr
-    #   fdr.pos[fdr > alpha | z<0]=1
-    #   fdr.neg[fdr > alpha | z>0]=1
-    #   features <- rownames(cica$S)
-    #   Features[[icomp]]<- list(
-    #     pos = data.frame(
-    #       features = features[fdr.pos<1],
-    #       fdr = fdr[fdr.pos<1],
-    #       stringsAsFactors=FALSE
-    #     ),
-    #     neg = data.frame(
-    #       features = features[fdr.neg<1],
-    #       fdr = fdr[fdr.neg<1],
-    #       stringsAsFactors=FALSE
-    #     )
-    #   )
-      
-    #})
-    
+      )
+    })
+    names(Features) <- colnames(cica$S)
     
     if(sort){
       Features <- sortFeatures(Features)

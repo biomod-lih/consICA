@@ -64,19 +64,17 @@ survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    R2 <- apply(IC$stab,2,mean)
    
    ## calculate hazard score
-   score <- d
-   i<- 1
-   for (i in seq.int(1,length(score))){
-     score[[i]] <- double(ncol(ZM))*0
-     names(score[[i]]) <- colnames(ZM)
-     j<-1
-     for (comp in names(d[[i]])) {
-       score[[i]] <- score[[i]] + d[[i]][comp] * R2[j] * ZM[j,] 
-       j<-j+1
-     }
-     
-   }
-  
+   ## as sum for each sample 
+   d1 <- d$surv
+   score1 <- lapply(names(d1), 
+                    function(comp){
+                      0 + d1[comp] * R2[comp] * ZM[comp,] 
+                    })
+   score_sumed <- matrix(unlist(score1), ncol = length(score1[[1]]))
+   score_sumed <- colSums(score_sumed)
+   names(score_sumed) <- names((score1[[1]])) 
+   score <- list("surv" = score_sumed)
+   
    i <- !is.na(surv$time)
    cox.train <- coxph(Surv(time = surv$time[i], event =surv$event[i]) ~ 
                        score$surv[i]) 
