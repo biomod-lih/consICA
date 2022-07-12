@@ -12,9 +12,9 @@ test_that("getFeatures test", {
   for(ic in seq_len(cica$ncomp)){
     expect_true(!is.null(features[[ic]]$pos$features))
     expect_true(!is.null(features[[ic]]$pos$fdr))
-    expect_true(features[[ic]]$pos$fdr >= 0)
+    expect_true(sum(!features[[ic]]$pos$fdr >= 0) == 0)
     expect_true(!is.null(features[[ic]]$neg$features))
     expect_true(!is.null(features[[ic]]$neg$fdr))
-    expect_true(features[[ic]]$neg$fdr >= 0)
+    expect_true(sum(!features[[ic]]$neg$fdr >= 0) == 0)
   }
 })
