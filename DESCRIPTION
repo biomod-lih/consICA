@@ -29,7 +29,7 @@ Description: consICA implements a data-driven deconvolution method – consensus
   The implementation of parallel computing in the package ensures efficient 
   analysis of modern multicore systems.
 BugReports: https://github.com/biomod-lih/consICA/issues
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
 Imports: fastICA (>= 1.2.1), 
