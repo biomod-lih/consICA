@@ -62,6 +62,7 @@ survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    names(d$surv) <- rownames(ResR)[idx]
    
    R2 <- apply(IC$stab,2,mean)
+   names(R2) <- colnames(IC$S)
    
    ## calculate hazard score
    ## as sum for each sample 
