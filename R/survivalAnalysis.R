@@ -23,7 +23,6 @@
 #'   surv = SummarizedExperiment::colData(samples_data)[,c("time", "event")]) 
 #' @export
 #' @importFrom survival coxph survfit Surv
-# @import survival
 survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    
    if(!is.null(time) & !is.null(event)){
@@ -90,7 +89,7 @@ survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    title(sprintf("logtest pv=%.1e\nLHR=%.2f (CI = %.2f, %.2f)",pv,
                  lhr[1],lhr[2], lhr[3]),cex.main=1)
    
-   print(cox.train)
+   # avoid note: print(cox.train)
    return(list("cox.model" = cox.train,
                "hazard.score" = d$surv))
 }

@@ -152,7 +152,7 @@ consICA <- function(X,
 
     }else{
       if(verbose){
-        m <-  ifelse(show.every > 0, 
+        m <- ifelse(show.every > 0, 
                      paste("showing progress every",show.every,"run(s)\n"),
                      "\n")
         message("Execute one-core analysis ", m)
@@ -213,7 +213,7 @@ consICA <- function(X,
         Res$S <- S[[1]]
         Res$M <- M[[1]]
         Res$ncomp  <- ncomp
-        Res$nsples <- ncol(X)
+        Res$nsamples <- ncol(X)
         Res$nfeatures <- nrow(X)
         return(Res)
     }
@@ -261,7 +261,7 @@ consICA <- function(X,
     }
     
     Res$ncomp  <- ncomp
-    Res$nsples <- ncol(X)
+    Res$nsamples <- ncol(X)
     Res$nfeatures <- nrow(X)
     if(verbose) message("consensus ICA done\n")
     return(Res)
@@ -334,7 +334,7 @@ oneICA <- function(X,
     colnames(Res$M) <- colnames(X)
     
     Res$ncomp <- ncomp
-    Res$nsples <- ncol(X)
+    Res$nsamples <- ncol(X)
     Res$nfeatures <- nrow(X)
     
     return(Res)

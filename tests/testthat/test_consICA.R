@@ -12,7 +12,6 @@ test_that("consICA test", {
   cica_redu <- consICA(samples_data, ncomp=10, ntry=4, 
                     show.every=2, filter.thr=4, reduced = TRUE)
   
-  
   expect_equal(length(colnames(cica10$S)), 10)
   expect_equal(length(rownames(cica10$M)), 10)
   expect_true(is.null(cicaNA))
