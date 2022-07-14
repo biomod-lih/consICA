@@ -17,9 +17,9 @@ is.consICA <- function(cica){
     if(!is.numeric(cica$ncomp)) return(FALSE)
     if(cica$ncomp <= 1) return(FALSE)
     
-    if(is.null(cica$nsples)) return(FALSE)
-    if(!is.numeric(cica$nsples)) return(FALSE)
-    if(cica$nsples <= 1) return(FALSE)
+    if(is.null(cica$nsamples)) return(FALSE)
+    if(!is.numeric(cica$nsamples)) return(FALSE)
+    if(cica$nsamples <= 1) return(FALSE)
     
     if(is.null(cica$nfeatures)) return(FALSE)
     if(!is.numeric(cica$nfeatures)) return(FALSE)
@@ -31,7 +31,7 @@ is.consICA <- function(cica){
     
     if(is.null(cica$M)) return(FALSE)
     if(!is.matrix(cica$M)) return(FALSE)
-    if(nrow(cica$M) != cica$ncomp | ncol(cica$M) != cica$nsples) return(FALSE) 
+    if(nrow(cica$M) != cica$ncomp | ncol(cica$M) != cica$nsamples) return(FALSE) 
     
     return(TRUE)
 }
@@ -70,6 +70,10 @@ sortDataFrame <- function(x, key, ...) {
 #' #                                 "fdr" = c(0, 0.1, 0.9))))
 #' #sortFeatures(features)
 sortFeatures <- function(Genes){
+  if(length(Genes) < 1){
+    message("Empty Genes vector\n")
+    return(NULL)
+  }
   ncomp <- length(Genes)
   for (icomp in seq.int(1,ncomp)){
     for (direct in c("neg","pos"))
