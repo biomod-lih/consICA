@@ -148,16 +148,16 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
       }   
     }
     
-    ix = 1; iy = 1
+    ix <- 1; iy <- 1
     if (!is.null(surv)){
       par(fig=c(0.2+(ix-1)*0.2,0.2+ix*0.2,0.55-iy*0.2,0.55-(iy-1)*0.2),
           new=TRUE,mar=c(4,2,2,1))
-      scoreD = c("low","high")[as.integer(IC$M[icomp,]>median(IC$M[icomp,]))+1]
-      scoreD = factor(scoreD,levels=c("low","high"))
-      cox = coxph(Surv(time = surv$time, event = surv$event) ~ IC$M[icomp,])
-      pv = summary(cox)$logtest["pvalue"]
-      lhr = log((summary(cox)$conf.int))[c(1,3,4)]
-      if (pv<1e-2) {col=c("blue","red")}else{col=c("#666688","#886666")}
+      scoreD <- c("low","high")[as.integer(IC$M[icomp,]>median(IC$M[icomp,]))+1]
+      scoreD <- factor(scoreD,levels=c("low","high"))
+      cox <- coxph(Surv(time = surv$time, event = surv$event) ~ IC$M[icomp,])
+      pv <- summary(cox)$logtest["pvalue"]
+      lhr <- log((summary(cox)$conf.int))[c(1,3,4)]
+      if (pv<1e-2) {col<-c("blue","red")}else{col<-c("#666688","#886666")}
       plot(survfit(Surv(time = surv$time, event = surv$event) ~ scoreD,
                    type="kaplan-meier"),col=col,conf.int=FALSE,las=2,
            lwd=c(2,2,2),cex.axis=0.4)
@@ -168,49 +168,49 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
     
     if (!is.null(Var)){
       #td check whetehr factor is adequate (number of levels and NAs)
-      pv = double(ncol(Var))+1
-      names(pv)= names(Var)
+      pv <- double(ncol(Var))+1
+      names(pv) <- names(Var)
       for (ifact in seq.int(1,ncol(Var))){
-        fact = Var[[ifact]]
-        ikeep = !is.na(fact)
-        fact = as.factor(as.character(fact[ikeep]))
+        fact <- Var[[ifact]]
+        ikeep <- !is.na(fact)
+        fact <- as.factor(as.character(fact[ikeep]))
         if (nlevels(fact)==1) next
-        x = IC$M[icomp,ikeep]
-        res = aov(x~fact)
-        pv[ifact] = summary(res)[[1]][1,5]
+        x <- IC$M[icomp,ikeep]
+        res <- aov(x~fact)
+        pv[ifact] <- summary(res)[[1]][1,5]
       }
-      pv = pv[getTopIdx(-log10(pv),min(10,length(pv)))]
-      tab = data.frame(factor = names(pv), p.value = sprintf("%.2e",pv))
+      pv <- pv[getTopIdx(-log10(pv),min(10,length(pv)))]
+      tab <- data.frame(factor = names(pv), p.value = sprintf("%.2e",pv))
       par(fig=c(0.4,1,0.4,0.58),new=TRUE,mar=c(0,2,2,1))
       plot.new()
       drawTable(tab,dx=c(0.8,0.2),dy=0.08,cex=0.5,row.names=FALSE,bg="white")
-      ix=1; iy=2
-      ifact=1
+      ix<-1; iy<-2
+      ifact<-1
       for (ifact in seq.int(1,min(8,length(pv)))){
         factname <- names(pv)[ifact]
-        fact = Var[[factname]]
-        ikeep = !is.na(fact)
-        fact = as.factor(as.character(fact[ikeep]))
+        fact <- Var[[factname]]
+        ikeep <- !is.na(fact)
+        fact <- as.factor(as.character(fact[ikeep]))
         
-        fontsize = 0.4
-        if (nlevels(fact)<=5) fontsize = 0.6
-        if (nlevels(fact)>15) fontsize = 0.3
-        if (nlevels(fact)>30) fontsize = 0.2
+        fontsize <- 0.4
+        if (nlevels(fact)<=5) fontsize <- 0.6
+        if (nlevels(fact)>15) fontsize <- 0.3
+        if (nlevels(fact)>30) fontsize <- 0.2
         
-        x = IC$M[icomp,ikeep]
-        xf = list()
-        for (i in seq.int(1,nlevels(fact))) xf[[i]] = x[fact == levels(fact)[i]]
-        names(xf) = levels(fact)
-        if (ix>4) {ix=1;iy=iy+1}
+        x <- IC$M[icomp,ikeep]
+        xf <- list()
+        for (i in seq.int(1,nlevels(fact))) xf[[i]] <- x[fact==levels(fact)[i]]
+        names(xf) <- levels(fact)
+        if (ix>4) {ix<-1;iy<-iy+1}
         par(fig=abs(c(0.2+(ix-1)*0.2,0.2+ix*0.2,0.6-iy*0.2,0.6-(iy-1)*0.2)),
             new=TRUE,mar=c(4,2,2,1))
-        col="grey"
-        if (pv[ifact]<1e-5)col="#66AAFF"
-        if (pv[ifact]<1e-10)col="#88FF66"
-        if (pv[ifact]<1e-20)col="#FF8866"
+        col<-"grey"
+        if (pv[ifact]<1e-5)col<-"#66AAFF"
+        if (pv[ifact]<1e-10)col<-"#88FF66"
+        if (pv[ifact]<1e-20)col<-"#FF8866"
         violinplot(xf, col=col,cex.axis = fontsize,colMed = "black")
         title(sprintf("%s\npv=%.1e",factname,pv[ifact]),cex.main=0.5)
-        ix = ix + 1
+        ix <- ix + 1
       }
     }
   }

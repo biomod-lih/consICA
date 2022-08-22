@@ -45,7 +45,7 @@
 #' @export
 
 #' @importFrom fastICA fastICA
-#' @import BiocParallel
+#' @importFrom BiocParallel bplapply SnowParam MulticoreParam bpparam
 #' @import topGO org.Hs.eg.db 
 #' @import GO.db 
 #' @importFrom graph nodeData
@@ -77,7 +77,7 @@ consICA <- function(X,
   
     Xse <- X
     X <- as.matrix(assay(X))
-    if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr,]
+    if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr, , drop=FALSE]
 
     Res <- list() # output
     Res$X <- Xse
@@ -312,7 +312,7 @@ oneICA <- function(X,
     
     ## create containers
     X <- as.matrix(X)
-    if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr,]
+    if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr, ,drop=FALSE]
     if (!reduced) Res$X <- Xse
     
     ## matrix of signal

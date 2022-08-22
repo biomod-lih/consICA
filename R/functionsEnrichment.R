@@ -51,7 +51,6 @@ enrichGO <- function(genes,
             max(common),"\n")
   }
   
-  #?docker:myGO2genes <- topGO::annFUN.org(whichOnto=db, mapping=genome,ID=id)
   myGO2genes <- annFUN.org(whichOnto=db, mapping = genome, ID = id)
 
   ## create topGOdata object
@@ -108,7 +107,7 @@ get_score <- function(genes, fc, thr.fc, fdr, thr.fdr, ntop){
   if (is.null(fc) | is.na(thr.fc)){
     score <- (-log10(fdr))
     if (is.na(ntop)){
-      score[fdr>=thr.fdr]=0
+      score[fdr>=thr.fdr]<-0
     }else{
       score[sort(score,index.return=TRUE,decreasing=TRUE)$ix[
         -(seq_along(ntop))]] <- 0

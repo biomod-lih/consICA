@@ -32,8 +32,8 @@ getFeatures <- function(cica, alpha = 0.05, sort = FALSE){
       fdr <- p.adjust(pv,method="BH")
       fdr.pos <- fdr
       fdr.neg <- fdr
-      fdr.pos[fdr > alpha | z<0]=1
-      fdr.neg[fdr > alpha | z>0]=1
+      fdr.pos[fdr > alpha | z<0]<-1
+      fdr.neg[fdr > alpha | z>0]<-1
       features <- rownames(cica$S)
       list(
         pos = data.frame(
