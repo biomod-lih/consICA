@@ -1,9 +1,7 @@
 #' @title Estimate the variance explained by the model
-#' @description This is an adaptation of 
-#' \code{\link[MOFA2]{calculate_variance_explained}}.\cr The method estimates 
+#' @description  The method estimates 
 #' the variance explained by the model and by each independent component.\cr
-#' As in the original \code{\link[MOFA2]{calculate_variance_explained}}, 
-#' we used the coefficient\cr of determination (R2) between the normalized 
+#' We used the coefficient of determination (R2) between the normalized 
 #' input (X-mean(X)) and (S*M)
 #' @param cica list compliant to `consICA()` result
 #' @param X a `SummarizedExperiment` object. Assay  used for the model. 
@@ -74,9 +72,9 @@ plotICVarianceExplained <- function(cica,
     
     if(!is.consICA(cica)) return (NULL)
     if(is.null(cica$eVarExpl$R2_ics)) 
-        cica$eVarExpl = estimateVarianceExplained(cica)
+        cica$eVarExpl <- estimateVarianceExplained(cica)
     if(is.null(cica$eVarExpl$R2_ics)) return (NULL)
-    if(!is.numeric(x.cex)) x.cex = NULL
+    if(!is.numeric(x.cex)) x.cex <- NULL
     
     r2_ics <- cica$eVarExpl$R2_ics
     

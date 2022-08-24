@@ -19,11 +19,9 @@ a list of:\cr
      component}
 }
 \description{
-This is an adaptation of 
-\code{\link[MOFA2]{calculate_variance_explained}}.\cr The method estimates 
+The method estimates 
 the variance explained by the model and by each independent component.\cr
-As in the original \code{\link[MOFA2]{calculate_variance_explained}}, 
-we used the coefficient\cr of determination (R2) between the normalized 
+We used the coefficient of determination (R2) between the normalized 
 input (X-mean(X)) and (S*M)
 }
 \examples{
