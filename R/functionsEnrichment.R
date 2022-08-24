@@ -113,9 +113,9 @@ get_score <- function(genes, fc, thr.fc, fdr, thr.fdr, ntop){
         -(seq_along(ntop))]] <- 0
     }
   }else{
-    score = (-log10(fdr)*abs(fc))
+    score <- (-log10(fdr)*abs(fc))
     if (is.na(ntop)){
-      score[fdr>=thr.fdr | abs(fc)<=thr.fc]=0
+      score[fdr>=thr.fdr | abs(fc)<=thr.fc] <- 0
     }else{
       score[sort(score,index.return=TRUE,decreasing=TRUE)$ix[
         -seq_along(ntop)]] <- 0

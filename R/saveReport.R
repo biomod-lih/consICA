@@ -82,9 +82,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
       is_mf <- !is.null(GO$GOMF)
       if(is_bp){
         par(fig=c(0.2,0.6,0.7,1),new=TRUE,mar=c(2,2,2,0));plot.new()
-        tab = GO$GOBP[[icomp]]$neg[,c("Term","FDR")]
-        tab = tab[tab$FDR<0.1,]
-        tab$FDR =sprintf("%.2e",tab$FDR)
+        tab <- GO$GOBP[[icomp]]$neg[,c("Term","FDR")]
+        tab <-tab[tab$FDR<0.1,]
+        tab$FDR <- sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:BP neg : %d terms(FDR<0.1)",nrow(tab)),
              col="#000088",font=2,adj=c(0,0),cex=0.6)
         if (nrow(tab)>0) drawTable(tab[seq.int(1,min(20,nrow(tab))),],
@@ -92,9 +92,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#000088")
         par(fig=c(0.6,1,0.7,1),new=TRUE,mar=c(2,2,2,0));plot.new()
-        tab = GO$GOBP[[icomp]]$pos[,c("Term","FDR")]
-        tab = tab[tab$FDR<0.1,]
-        tab$FDR =sprintf("%.2e",tab$FDR)
+        tab <- GO$GOBP[[icomp]]$pos[,c("Term","FDR")]
+        tab <- tab[tab$FDR<0.1,]
+        tab$FDR <- sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:BP pos : %d terms(FDR<0.1)",nrow(tab)),
              col="#880000",font=2,adj=c(0,0),cex=0.6)
         if (nrow(tab)>0) drawTable(tab[seq.int(1,min(20,nrow(tab))),],
@@ -104,9 +104,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
       }
       if(is_cc){
         par(fig=c(0.2,0.6,0.506,0.806),new=TRUE,mar=c(2,2,2,0));plot.new()
-        tab = GO$GOCC[[icomp]]$neg[,c("Term","FDR")]
-        tab = tab[tab$FDR<0.1,]
-        tab$FDR =sprintf("%.2e",tab$FDR)
+        tab <- GO$GOCC[[icomp]]$neg[,c("Term","FDR")]
+        tab <- tab[tab$FDR<0.1,]
+        tab$FDR <- sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:CC neg : %d terms(FDR<0.1)",nrow(tab)),
              col="#000088",font=2,adj=c(0,0),cex=0.6)
         if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],
@@ -114,9 +114,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#000088")
         par(fig=c(0.6,1,0.506,0.806),new=TRUE,mar=c(2,2,2,0));plot.new()
-        tab = GO$GOCC[[icomp]]$pos[,c("Term","FDR")]
-        tab = tab[tab$FDR<0.1,]
-        tab$FDR =sprintf("%.2e",tab$FDR)
+        tab <- GO$GOCC[[icomp]]$pos[,c("Term","FDR")]
+        tab <- tab[tab$FDR<0.1,]
+        tab$FDR <- sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:CC pos : %d terms(FDR<0.1)",nrow(tab)),
              col="#880000",font=2,adj=c(0,0),cex=0.6)
         if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],
@@ -126,9 +126,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
       }      
       if(is_mf){
         par(fig=c(0.2,0.6,0.397,0.697),new=TRUE,mar=c(2,2,2,0));plot.new()
-        tab = GO$GOMF[[icomp]]$neg[,c("Term","FDR")]
-        tab = tab[tab$FDR<0.1,]
-        tab$FDR =sprintf("%.2e",tab$FDR)
+        tab <- GO$GOMF[[icomp]]$neg[,c("Term","FDR")]
+        tab <- tab[tab$FDR<0.1,]
+        tab$FDR <- sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:MF neg : %d terms(FDR<0.1)",nrow(tab)),
              col="#000088",font=2,adj=c(0,0),cex=0.6)
         if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],
@@ -136,9 +136,9 @@ saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL,
                                    dx=c(0.8,0.2),dy=0.04,row.names=FALSE,
                                    cex=0.5,col="#000088")
         par(fig=c(0.6,1,0.397,0.697),new=TRUE,mar=c(2,2,2,0));plot.new()
-        tab = GO$GOMF[[icomp]]$pos[,c("Term","FDR")]
-        tab = tab[tab$FDR<0.1,]
-        tab$FDR =sprintf("%.2e",tab$FDR)
+        tab <- GO$GOMF[[icomp]]$pos[,c("Term","FDR")]
+        tab <- tab[tab$FDR<0.1,]
+        tab$FDR <- sprintf("%.2e",tab$FDR)
         text(0,1,sprintf("GO:MF pos : %d terms(FDR<0.1)",nrow(tab)),
              col="#880000",font=2,adj=c(0,0),cex=0.6)
         if (nrow(tab)>0) drawTable(tab[seq.int(1,min(10,nrow(tab))),],

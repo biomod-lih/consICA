@@ -31,7 +31,7 @@ is.consICA <- function(cica){
     
     if(is.null(cica$M)) return(FALSE)
     if(!is.matrix(cica$M)) return(FALSE)
-    if(nrow(cica$M) != cica$ncomp | ncol(cica$M) != cica$nsamples) return(FALSE) 
+    if(nrow(cica$M) != cica$ncomp | ncol(cica$M) != cica$nsamples)return(FALSE) 
     
     return(TRUE)
 }
