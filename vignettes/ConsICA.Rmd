@@ -2,6 +2,7 @@
 title: 'The consICa package: User’s manual'
 author: Petr V. Nazarov, Tony Kaoma, Maryna Chepeleva
 date: "`r Sys.Date()`"
+abstract: This vignette describes the Bioconductor package consICA. We developed a fast parallelized algorithm for deconvolution of omics data, based on the independent component analysis. Additionally, we implemented convenient functionality for the analysis of decomposed signals including ANOVA-based linking to experimental factors, enrichment analysis, and survival analysis. A PDF report can be generated automatically by the package. The package was previously applied to single-cell and bulk-sample transcriptomics data in the field of cancer research. We showed the ability of the approach to (i) separate biologically relevant molecular signals from technical biases, (ii) identify molecular signals specific to cell types and cellular processes, (iii) provide a feature engineering mechanism improving the classification of the samples [1,2,3].
 output: BiocStyle::html_document
 package: consICA
 vignette: |
@@ -20,7 +21,7 @@ knitr::opts_chunk$set(
 <font size="2">This document describes the usage of the functions integrated into the package and is meant to be a reference document for the end-user. </font>
 
 # Introduction
-Independent component analysis (ICA) of omics data can be used for deconvolution of biological signals and technical biases, correction of batch effects, feature engineering for classification and integration of the data [1]. The consICA package allows building robust consensus ICA-based deconvolution of the data as well as running post-hoc biological interpretation of the results. The implementation of parallel computing in the package ensures efficient analysis using modern multicore systems.
+Independent component analysis (ICA) of omics data can be used for deconvolution of biological signals and technical biases, correction of batch effects, feature engineering for classification and integration of the data [4]. The consICA package allows building robust consensus ICA-based deconvolution of the data as well as running post-hoc biological interpretation of the results. The implementation of parallel computing in the package ensures efficient analysis using modern multicore systems.
 
 # Installing and loading the package
 Load the package with the following command:
@@ -55,7 +56,7 @@ Var <- Var[,-which(colnames(Var) != "time" & colnames(Var) != "event")]
 
 ```
 # Consensus independent component analysis
-Independent component analysis (ICA) is an unsupervised method of signal deconvolution [2]. 
+Independent component analysis (ICA) is an unsupervised method of signal deconvolution [3]. 
 ICA decomposes combined gene expression matrix from multiple samples into meaningful signals in the space of genes (metagenes, S)  and weights in the space of samples (weight matrix, M). 
 ```{r echo=FALSE, out.width='95%', fig.align="center"}
 knitr::include_graphics('./Picture1.jpg')
@@ -97,7 +98,7 @@ p <- plotICVarianceExplained(cica)
 For each component we can carry out an enrichment analysis. The genes with expression above the selected threshold in at least one sample, were used as a background gene list and significantly overrepresented(adj.p-value < `alpha`) GO terms. You can select the db for search: biological process ("BP"), molecular function ("MF") and/or cellular component ("CC").
 ```{r, results='hide'}
 ## To save time for this example load result of getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
-if(!exists("GOs_40_s2022.rds")){
+if(!file.exists("GOs_40_s2022.rds")){
   GOs <- readRDS(url("http://edu.modas.lu/data/consICA/GOs_40_s2022.rds", "r"))
   saveRDS(GOs, "GOs_40_s2022.rds")
 } else{
@@ -110,7 +111,7 @@ if(!exists("GOs_40_s2022.rds")){
 ```
 
 # Survival analysis
-Weights of the components (rows of matrix M) can be statistically linked to patient survival using Cox partial hazard regression [1]. In `survivalAnalysis` function adjusted p-values of the log-rank test are used to select significant components. However, the prognostic power of each individual component might not have been high enough to be applied to the patients from the new cohort. Therefore, `survivalAnalysis` integrates weights of several components, calculating the risk score (RS) with improved prognostic power. For each sample, its RS is the sum of the products of significant log-hazard ratios (LHR) of the univariable Cox regression, the component stability R2 and the standardized row of weight matrix M.
+Weights of the components (rows of matrix M) can be statistically linked to patient survival using Cox partial hazard regression [4]. In `survivalAnalysis` function adjusted p-values of the log-rank test are used to select significant components. However, the prognostic power of each individual component might not have been high enough to be applied to the patients from the new cohort. Therefore, `survivalAnalysis` integrates weights of several components, calculating the risk score (RS) with improved prognostic power. For each sample, its RS is the sum of the products of significant log-hazard ratios (LHR) of the univariable Cox regression, the component stability R2 and the standardized row of weight matrix M.
 ```{r}
 RS <- survivalAnalysis(cica, surv = Sur)
 cat("Hazard score for significant components")
@@ -137,7 +138,10 @@ unlink("GOs_40_s2022.rds")
 sessionInfo()
 ```
 # References 
-1. Nazarov, P.V., Wienecke-Baldacchino, A.K., Zinovyev, A. et al. Deconvolution of transcriptomes and miRNomes by independent component analysis provides insights into biological processes and clinical outcomes of melanoma patients. BMC Med Genomics 12, 132 (2019). https://doi.org/10.1186/s12920-019-0578-4
+1. Golebiewska, A., et al. Patient-derived organoids and orthotopic xenografts of primary and recurrent gliomas represent relevant patient avatars for precision oncology. Acta Neuropathol 2020;140(6):919-949.
 
-2. Sompairac, N.; Nazarov, P.V.; Czerwinska, U.; Cantini, L.; Biton, A,; Molkenov, A,; Zhumadilov, Z.; Barillot, E.; Radvanyi, F.; Gorban, A.; Kairov, U.; Zinovyev, A. Independent component analysis for unravelling complexity of cancer omics datasets. International Journal of Molecular Sciences 20, 18 (2019). https://doi.org/10.3390/ijms20184414
+2. Scherer, M., et al. Reference-free deconvolution, visualization and interpretation of complex DNA methylation data using DecompPipeline, MeDeCom and FactorViz. Nat Protoc 2020;15(10):3240-3263.
 
+3. Sompairac, N.; Nazarov, P.V.; Czerwinska, U.; Cantini, L.; Biton, A,; Molkenov, A,; Zhumadilov, Z.; Barillot, E.; Radvanyi, F.; Gorban, A.; Kairov, U.; Zinovyev, A. Independent component analysis for unravelling complexity of cancer omics datasets. International Journal of Molecular Sciences 20, 18 (2019). https://doi.org/10.3390/ijms20184414
+
+4.Nazarov, P.V., Wienecke-Baldacchino, A.K., Zinovyev, A. et al. Deconvolution of transcriptomes and miRNomes by independent component analysis provides insights into biological processes and clinical outcomes of melanoma patients. BMC Med Genomics 12, 132 (2019). https://doi.org/10.1186/s12920-019-0578-4
