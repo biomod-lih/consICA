@@ -144,7 +144,7 @@ consICA <- function(X,
       }
       
       bp_param <- set_bpparam(ncores, BPPARAM = bpparam)
-      bp_param$progressbar = TRUE
+      bp_param$progressbar <- TRUE
       seqntry <- seq.int(ntry)
       MRICA <- bplapply(X=seqntry, FUN = par_fica, BPPARAM = bp_param,
                         Res=Res,Z=X,ncomp=ncomp,alg.typ=alg.typ,fun=fun,
