@@ -3,7 +3,7 @@
 #' of independent components with significant contribution in individual
 #' risk model. For more see Nazarov et al. 2019 
 #' In addition the function plot Kaplan-Meier diagram.
-#' @param IC  list compliant to `consICA()` result
+#' @param cica  list compliant to `consICA()` result
 #' @param surv dataframe with time and event values for each sample. Use this
 #' parameter or `time` and `event`
 #' @param time survival time value for each sample 
@@ -23,8 +23,14 @@
 #'   surv = SummarizedExperiment::colData(samples_data)[,c("time", "event")]) 
 #' @export
 #' @importFrom survival coxph survfit Surv
-survivalAnalysis <- function(IC,surv=NULL,time=NULL,event=NULL,fdr=0.05){
+survivalAnalysis <- function(cica,surv=NULL,time=NULL,event=NULL,fdr=0.05){
    
+  if(!is.consICA(cica)) {
+    message("First parameter should be compliant to `consICA()` result\n")
+    return (NULL)
+  }
+  IC <- cica
+  
    if(!is.null(time) & !is.null(event)){
      surv <- list("time" = time, "event" = event)
    }
