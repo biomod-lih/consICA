@@ -21,8 +21,11 @@
 #' ic1_pos <- features$ic.1$pos
 #' @export
 getFeatures <- function(cica, alpha = 0.05, sort = FALSE){
-    if(!is.consICA(cica)) return (NULL)
-    if(alpha >= 1 | alpha <= 0) return(NULL)
+  if(!is.consICA(cica)) {
+    message("First parameter should be compliant to `consICA()` result\n")
+    return (NULL)
+  }
+  if(alpha >= 1 | alpha <= 0) return(NULL)
     
     Features <- lapply(colnames(cica$S), function(icomp, S = cica$S) {
       z  <- S[,icomp]

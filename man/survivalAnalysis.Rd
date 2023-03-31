@@ -4,10 +4,10 @@
 \alias{survivalAnalysis}
 \title{Survival analysis based on significant IC}
 \usage{
-survivalAnalysis(IC, surv = NULL, time = NULL, event = NULL, fdr = 0.05)
+survivalAnalysis(cica, surv = NULL, time = NULL, event = NULL, fdr = 0.05)
 }
 \arguments{
-\item{IC}{list compliant to `consICA()` result}
+\item{cica}{list compliant to `consICA()` result}
 
 \item{surv}{dataframe with time and event values for each sample. Use this
 parameter or `time` and `event`}

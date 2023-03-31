@@ -16,7 +16,10 @@
 #' var_ic <- estimateVarianceExplained(cica)
 #' @export
 estimateVarianceExplained <- function(cica, X=NULL) {
-    if(!is.consICA(cica))  return (NULL)
+    if(!is.consICA(cica)) {
+      message("First parameter should be compliant to `consICA()` result\n")
+      return (NULL)
+    }
     if(!is.null(cica$X))  X <- cica$X
     if(is.null(X))  return (NULL)
     
@@ -70,7 +73,10 @@ plotICVarianceExplained <- function(cica,
                                     x.cex = NULL,
                                     ...){
     
-    if(!is.consICA(cica)) return (NULL)
+    if(!is.consICA(cica)) {
+      message("First parameter should be compliant to `consICA()` result\n")
+      return (NULL)
+    }
     if(is.null(cica$eVarExpl$R2_ics)) 
         cica$eVarExpl <- estimateVarianceExplained(cica)
     if(is.null(cica$eVarExpl$R2_ics)) return (NULL)
