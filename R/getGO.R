@@ -1,15 +1,22 @@
 #' @title Assigns IC signatures to Gene Ontologies
-#' @description Assigns extracted independent components to Gene Ontologies
-#' @param IC  list compliant to `consICA()` result
+#' @description Assigns extracted independent components to Gene Ontologies and
+#' rotate independent components (`S` matrix) to set most significant 
+#' Gene Ontologies as positive affecting features
+#' @param cica  list compliant to `consICA()` result
 #' @param alpha value in [0,1] interval. Used to filter features with 
 #' FDR < `alpha`. Default value is 0.05
 #' @param genenames alternative names of genes
 #' @param genome R-package for genome annotation used. For human -
 #' 'org.Hs.eg.db'
 #' @param db name of GO database: "BP","MF","CC"
-#' @return list for each db chosen (BP, CC, MM), with dataframes `pos` for 
+#' @param rotate rotate components in `S` and `M` matricies in `cica` object 
+#' to set most significant Gene Ontologies as positive effective features. 
+#' Default is TRUE
+#' @return rotated (if need) `cica` object with added `GO` - 
+#' list for each db chosen (BP, CC, MM), 
+#' with dataframes `pos` for 
 #' positive and `neg` for negative affecting features for each component:
-#'     \item{GO.ID}{id of gene ontology term}
+#'     \item{GO.ID}{id of Gene Ontology term}
 #'     \item{Term}{name of term}
 #'     \item{Annotated}{number of annotated genes}
 #'     \item{Significant}{number of significant genes}
@@ -23,14 +30,23 @@
 #' @examples
 #' data("samples_data")
 #' # cica <- consICA(samples_data, ncomp=40, ntry=1, show.every=0)
-#' cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) #exp timesave
-#' GOs <- getGO(cica, db = "BP")
+#' cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) # timesaving 
+#' example
+#' cica <- getGO(cica, db = "BP")
+#' head(cica$GO$GOBP$ic02$pos)
 #' @export
-getGO <- function(IC,
+getGO <- function(cica,
                  alpha=0.05, 
                  genenames=NULL, 
                  genome="org.Hs.eg.db",
-                 db=c("BP", "CC", "MF")){
+                 db=c("BP", "CC", "MF"),
+                 rotate=TRUE){
+  
+  if(!is.consICA(cica)) {
+    message("First parameter should be compliant to `consICA()` result\n")
+    return (NULL)
+  }
+  IC <- cica
   
   is_bp <- "BP" %in% db
   is_cc <- "CC" %in% db
@@ -107,16 +123,26 @@ getGO <- function(IC,
   if(is_bp) {
     GO <- append(GO, list(GOBP))
     names(GO) <- c(names(GO)[-length(names(GO))], "GOBP")
+    rm(GOBP)
   }
   if(is_cc) {
     GO <- append(GO, list(GOCC))
     names(GO) <- c(names(GO)[-length(names(GO))], "GOCC")
+    rm(GOCC)
   }
   if(is_mf) {
     GO <- append(GO, list(GOMF))
     names(GO) <- c(names(GO)[-length(names(GO))], "GOMF")
+    rm(GOMF)
   }
-  rm(GOBP, GOCC, GOMF)
+
+  cica$GO <- GO
+  rm(GO)
+  
+  if(rotate){
+    cica <- setOrientation(cica)
+  } 
+
   gc()
-  return(GO)
+  return(cica)
 }

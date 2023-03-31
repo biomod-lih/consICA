@@ -5,15 +5,16 @@
 \title{Assigns IC signatures to Gene Ontologies}
 \usage{
 getGO(
-  IC,
+  cica,
   alpha = 0.05,
   genenames = NULL,
   genome = "org.Hs.eg.db",
-  db = c("BP", "CC", "MF")
+  db = c("BP", "CC", "MF"),
+  rotate = TRUE
 )
 }
 \arguments{
-\item{IC}{list compliant to `consICA()` result}
+\item{cica}{list compliant to `consICA()` result}
 
 \item{alpha}{value in [0,1] interval. Used to filter features with 
 FDR < `alpha`. Default value is 0.05}
@@ -24,11 +25,16 @@ FDR < `alpha`. Default value is 0.05}
 'org.Hs.eg.db'}
 
 \item{db}{name of GO database: "BP","MF","CC"}
+
+\item{rotate}{rotate components in `S` and `M` matricies in `cica` object to set most 
+significant Gene Ontologies as positive effective features. Default is TRUE}
 }
 \value{
-list for each db chosen (BP, CC, MM), with dataframes `pos` for 
+rotated (if need) `cica` object with added `GO` - 
+list for each db chosen (BP, CC, MM), 
+with dataframes `pos` for 
 positive and `neg` for negative affecting features for each component:
-    \item{GO.ID}{id of gene ontology term}
+    \item{GO.ID}{id of Gene Ontology term}
     \item{Term}{name of term}
     \item{Annotated}{number of annotated genes}
     \item{Significant}{number of significant genes}
@@ -40,13 +46,17 @@ positive and `neg` for negative affecting features for each component:
     \item{Score}{genes score}
 }
 \description{
-Assigns extracted independent components to Gene Ontologies
+Assigns extracted independent components to Gene Ontologies and
+rotate independent components (`S` matrix) to set most significant 
+Gene Ontologies as positive affecting features
 }
 \examples{
 data("samples_data")
 # cica <- consICA(samples_data, ncomp=40, ntry=1, show.every=0)
-cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) #exp timesave
-GOs <- getGO(cica, db = "BP")
+cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) # timesaving 
+example
+cica <- getGO(cica, db = "BP")
+head(cica$GO$GOBP$ic02$pos)
 }
 \author{
 Petr V. Nazarov

@@ -2,13 +2,12 @@
 #' @description Save PDF report with description of each independent component 
 #' (IC) consists of most affected genes, significant Go terms, survival model
 #' for the component, ANOVA analysis for samples characteristics and stability
-#' @param IC list compliant to `consICA()` result
+#' @param cica list compliant to `consICA()` result. May include GO list with 
+#' enrichment analysis appended with `getGO()` function
 #' @param Genes features list compilant to `getFeatures` output (list of 
 #' dataframes `pos` for positive and `neg` for negative affecting features with
 #' names of features false discovery rates columns).If NULL will generated 
 #' automatically
-#' @param GO list compilant to `getGO` output. If not NULL the significant GO 
-#' terms will printed in report
 #' @param Var matrix with samples metadata
 #' @param surv dataframe with time and event values for each sample
 #' @param genenames alternative gene names for printing in the report
@@ -20,19 +19,27 @@
 #' @examples
 #' data("samples_data")
 #' cica <- consICA(samples_data, ncomp=40, ntry=10, show.every=0)
-#' GOs <- NULL 
 #' if(FALSE){
-#' GOs <- getGO(cica, db = "BP")
+#' cica <- getGO(cica, db = "BP")
 #' }
-#' saveReport(cica, GO=GOs, Var=samples_data$Var, surv = samples_data$Sur)
+#' saveReport(cica, Var=samples_data$Var, surv = samples_data$Sur)
 #' @export
 # @import gplots
 #' @importFrom pheatmap pheatmap
-saveReport <- function(IC, Genes=NULL, GO=NULL, Var=NULL, surv=NULL, 
+saveReport <- function(cica, Genes=NULL, Var=NULL, surv=NULL, 
                       genenames=NULL,
                       file = sprintf("report_ICA_%d.pdf",ncol(IC$S)), 
                       main = "Component # %d (stability = %.3f)", 
-                      show.components = seq.int(1,ncol(IC$S))){
+                      show.components = seq.int(1,ncol(cica$S))){
+  
+  if(!is.consICA(cica)) {
+    message("First parameter should be compliant to `consICA()` result\n")
+    return (NULL)
+  }
+  
+  IC <- cica
+  GO <- cica$GO
+  
   if(is.null(Genes)) Genes <- getFeatures(IC,alpha=0.01)
   if(!is.null(Var)) if (!is.data.frame(Var)) Var <- as.data.frame(Var)
   

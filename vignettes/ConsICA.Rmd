@@ -31,18 +31,18 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) {
 }
 BiocManager::install("consICA")
 ```
-```{r, echo=T, results = 'hide'}
+```{r,warning=FALSE,message=FALSE}
 library('consICA')
 ```
 
 # Example dataset
 The usage of the package functions for an independent component deconvolution is shown for an example set of 472 samples and 2454 most variable genes from the skin cutaneous melanoma (SKCM) TCGA cohort. It stored as a `SummarizedExperiment` object. In addition the data includes metadata such as age, gender, cancer subtype etc. and survival time-to-event data.
 Use data as
-```{r}
-library(SummarizedExperiment, verbose = FALSE)
+```{r,warning=FALSE,message=FALSE}
+library(SummarizedExperiment)
 data("samples_data")
-
 samples_data
+
 # According to our terminology expression matrix X of 2454 genes and 472 samples
 X <- data.frame(assay(samples_data))
 dim(X)
@@ -52,7 +52,7 @@ dim(Var)
 colnames(Var)[1:20] # print first 20
 # survival time and event for each sample
 Sur <- data.frame(colData(samples_data))[,c("time", "event")]
-Var <- Var[,-which(colnames(Var) != "time" & colnames(Var) != "event")]
+Var <- Var[,which(colnames(Var) != "time" & colnames(Var) != "event")]
 
 ```
 # Consensus independent component analysis
@@ -61,14 +61,14 @@ ICA decomposes combined gene expression matrix from multiple samples into meanin
 ```{r echo=FALSE, out.width='95%', fig.align="center"}
 knitr::include_graphics('./Picture1.jpg')
 ```
-Figure 1. ICA decomposes combined gene expression matrix from multiple samples into meaningful signals in the space of genes (metagenes, S) and weights in the space of samples (weight matrix, M). Biological processes and signatures of cell subtypes can be found in S, while M could be linked to patient groups and patient survival (Cox regression and Eq.1). 
+Figure 1. ICA decomposes combined gene expression matrix from multiple samples into meaningful signals in the space of genes (metagenes, S) and weights in the space of samples (weight matrix, M). Biological processes and signatures of cell subtypes can be found in S, while M could be linked to patient groups and patient survival (Cox regression and Eq.1).
 
 The `consICA` function calculates the consensus ICA for an expression matrix: X = 𝑆 × 𝑀, where S is a
 matrix of statistically independent and biologically meaningful signals (metagenes) and M – their weights (metasamples). You can set the number of components, the number of consensus runs. The function will print logs every `show.every` run. Use `ncores` for parallel calculation. To filter out genes (rows) with values lower than a threshold set the `filter.thr` argument.
 
 ```{r}
 set.seed(2022)
-cica <- consICA(samples_data, ncomp=40, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=20, ntry=10, show.every=0)
 ```
 The output of consensus ICA is a list with input data `X` (assays of SummarizedExperiment  `samples_data` object) and it dimensions, consensus metagene `S` and weight matrix `M`, number of components, mean R2 between rows of M (`mr2`), stability as mean R2 between consistent columns of S in multiple tries  (`stab`) and number of best iteration (`ibest`). For compact output use `reduced` = TRUE.
 ```{r}
@@ -95,19 +95,26 @@ p <- plotICVarianceExplained(cica)
 ```
 
 # Enrichment analysis
-For each component we can carry out an enrichment analysis. The genes with expression above the selected threshold in at least one sample, were used as a background gene list and significantly overrepresented(adj.p-value < `alpha`) GO terms. You can select the db for search: biological process ("BP"), molecular function ("MF") and/or cellular component ("CC").
+For each component we can carry out an enrichment analysis. The genes with expression above the selected threshold in at least one sample, were used as a background gene list and significantly overrepresented(adj.p-value < `alpha`) GO terms. You can select the DB for search: biological process ("BP"), molecular function ("MF") and/or cellular component ("CC").
 ```{r, results='hide'}
 ## To save time for this example load result of getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
-if(!file.exists("GOs_40_s2022.rds")){
-  GOs <- readRDS(url("http://edu.modas.lu/data/consICA/GOs_40_s2022.rds", "r"))
-  saveRDS(GOs, "GOs_40_s2022.rds")
+if(!file.exists("cica_GOs_20_s2022.rds")){
+  
+  # Old version < 1.1.1 - GO was external object. Add it to cica and rotate if need
+  # GOs <- readRDS(url("http://edu.modas.lu/data/consICA/GOs_40_s2022.rds", "r"))
+  # cica$GO <- GOs
+  # cica <- setOrientation(cica)
+  
+  # Actual version >= 1.1.1
+  cica <- readRDS(url("http://edu.modas.lu/data/consICA/cica_GOs_20_s2022.rds", "r"))
+  saveRDS(cica, "cica_GOs_20_s2022.rds")
 } else{
-    GOs <- readRDS("GOs_40_s2022.rds")
+  cica <- readRDS("cica_GOs_20_s2022.rds")
 }
 ## Search GO (biological process)
-# GOs <- getGO(cica, alpha = 0.05, db = "BP")
+# cica <- getGO(cica, alpha = 0.05, db = "BP")
 ## Search GO (biological process, molecular function, cellular component)
-# GOs <- getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
+# cica <- getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
 ```
 
 # Survival analysis
@@ -123,14 +130,14 @@ The best way to get a full description of extracted components is using our auto
 ```{r}
 # Generate report with independent components description
 if(FALSE){
-  saveReport(cica, GO=GOs, Var=Var, surv = Sur)
+  saveReport(cica, Var=Var, surv = Sur)
 }
 ```
-The copy of this report you can find at http://edu.modas.lu/data/consICA/report_ICA_40.pdf
+The copy of this report you can find at http://edu.modas.lu/data/consICA/report_ICA_20.pdf
 
 ```{r}
 # delete loaded file after vignette run
-unlink("GOs_40_s2022.rds")
+unlink("cica_GOs_20_s2022.rds")
 ```
 
 # Session info 

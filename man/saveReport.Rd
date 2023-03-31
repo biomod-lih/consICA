@@ -5,27 +5,24 @@
 \title{Save PDF report with analysis of each independent component}
 \usage{
 saveReport(
-  IC,
+  cica,
   Genes = NULL,
-  GO = NULL,
   Var = NULL,
   surv = NULL,
   genenames = NULL,
   file = sprintf("report_ICA_\%d.pdf", ncol(IC$S)),
   main = "Component # \%d (stability = \%.3f)",
-  show.components = seq.int(1, ncol(IC$S))
+  show.components = seq.int(1, ncol(cica$S))
 )
 }
 \arguments{
-\item{IC}{list compliant to `consICA()` result}
+\item{cica}{list compliant to `consICA()` result. May include GO list with 
+enrichment analysis appended with `getGO()` function}
 
 \item{Genes}{features list compilant to `getFeatures` output (list of 
 dataframes `pos` for positive and `neg` for negative affecting features with
 names of features false discovery rates columns).If NULL will generated 
 automatically}
-
-\item{GO}{list compilant to `getGO` output. If not NULL the significant GO 
-terms will printed in report}
 
 \item{Var}{matrix with samples metadata}
 
@@ -50,11 +47,10 @@ for the component, ANOVA analysis for samples characteristics and stability
 \examples{
 data("samples_data")
 cica <- consICA(samples_data, ncomp=40, ntry=10, show.every=0)
-GOs <- NULL 
 if(FALSE){
-GOs <- getGO(cica, db = "BP")
+cica <- getGO(cica, db = "BP")
 }
-saveReport(cica, GO=GOs, Var=samples_data$Var, surv = samples_data$Sur)
+saveReport(cica, Var=samples_data$Var, surv = samples_data$Sur)
 }
 \author{
 Petr V. Nazarov
