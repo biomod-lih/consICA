@@ -1,8 +1,17 @@
+# CHANGES IN VERSION 1.1.1
+
+* Include GO in cica object and implement auto setOrientation()
+* Add setOrientation() function (for positive significant GOs)
+* Renamed parameter: 'cica' in all functions
+* Add checkers 'compliant to `consICA()` result'
+
+
 # CHANGES IN VERSION 0.99.1
 
 * fix Notes 
 * add unit tests
 * vectorization
+
 
 # CHANGES IN VERSION 0.99.0
 
