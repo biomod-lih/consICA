@@ -12,7 +12,7 @@
 #' @note Implemented inside `getGO()` in version >= 1.1.1.
 #' @author Petr V. Nazarov
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data("samples_data")
 #' # Get deconvolution of X matrix
 #' #cica <-  consICA(samples_data, ncomp=10, ntry=1, show.every=0)
