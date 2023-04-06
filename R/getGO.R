@@ -5,7 +5,9 @@
 #' @param cica  list compliant to `consICA()` result
 #' @param alpha value in [0,1] interval. Used to filter features with 
 #' FDR < `alpha`. Default value is 0.05
-#' @param genenames alternative names of genes
+#' @param genenames alternative names of genes. If NULL we use rownames of `S`
+#' matrix. We automatically identify type of gene identifier, you can use  
+#' Ensembl, Symbol, Entrez, Alias, Genename IDs.
 #' @param genome R-package for genome annotation used. For human -
 #' 'org.Hs.eg.db'
 #' @param db name of GO database: "BP","MF","CC"
@@ -52,6 +54,8 @@ getGO <- function(cica,
   is_cc <- "CC" %in% db
   is_mf <- "MF" %in% db
   
+  genes_id_type <- c("entrez", "ensembl", "symbol", "genename")
+
   Genes <- list()
   if(is_bp)GOBP <- list()
   if(is_cc)GOCC <- list()
@@ -88,8 +92,7 @@ getGO <- function(cica,
     message("---- Component ",icomp," ----\n")
     if(is_bp)GOBP[[icomp]]$pos <- enrichGO(genes = genes,
                                           fdr = fdr.pos,thr.fdr=alpha,db="BP",
-                                          id= c("entrez", "ensembl", "symbol",
-                                                "genename"),
+                                          id = genes_id_type,
                                           genome=genome)
     if(is_cc)GOCC[[icomp]]$pos <- enrichGO(genes = genes,
                                           fdr = fdr.pos,thr.fdr=alpha,db="CC",
@@ -98,24 +101,20 @@ getGO <- function(cica,
                                           genome=genome)
     if(is_mf)GOMF[[icomp]]$pos <- enrichGO(genes = genes,
                                           fdr = fdr.pos,thr.fdr=alpha,db="MF",
-                                          id= c("entrez", "ensembl", "symbol", 
-                                                 "genename"),
+                                          id= genes_id_type,
                                           genome=genome)
 
     if(is_bp)GOBP[[icomp]]$neg <- enrichGO(genes = genes,
                                           fdr = fdr.neg,thr.fdr=alpha,db="BP",
-                                          id= c("entrez", "ensembl", "symbol", 
-                                                "genename"),
+                                          id= genes_id_type,
                                           genome=genome)
     if(is_cc)GOCC[[icomp]]$neg <- enrichGO(genes = genes,
                                           fdr = fdr.neg,thr.fdr=alpha,db="CC",
-                                          id= c("entrez", "ensembl", "symbol", 
-                                                "genename"),
+                                          id= genes_id_type,
                                           genome=genome)
     if(is_mf)GOMF[[icomp]]$neg <- enrichGO(genes = genes,
                                           fdr = fdr.neg,thr.fdr=alpha,db="MF",
-                                          id= c("entrez", "ensembl", "symbol", 
-                                                "genename"),
+                                          id= genes_id_type,
                                           genome=genome)
 
   }

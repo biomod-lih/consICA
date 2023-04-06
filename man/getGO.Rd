@@ -19,15 +19,18 @@ getGO(
 \item{alpha}{value in [0,1] interval. Used to filter features with 
 FDR < `alpha`. Default value is 0.05}
 
-\item{genenames}{alternative names of genes}
+\item{genenames}{alternative names of genes. If NULL we use rownames of `S`
+matrix. We automatically identify type of gene identifier, you can use  
+Ensembl, Symbol, Entrez, Alias, Genename IDs.}
 
 \item{genome}{R-package for genome annotation used. For human -
 'org.Hs.eg.db'}
 
 \item{db}{name of GO database: "BP","MF","CC"}
 
-\item{rotate}{rotate components in `S` and `M` matricies in `cica` object to set most 
-significant Gene Ontologies as positive effective features. Default is TRUE}
+\item{rotate}{rotate components in `S` and `M` matricies in `cica` object 
+to set most significant Gene Ontologies as positive effective features. 
+Default is TRUE}
 }
 \value{
 rotated (if need) `cica` object with added `GO` - 
