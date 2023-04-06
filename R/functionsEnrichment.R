@@ -47,6 +47,13 @@ enrichGO <- function(genes,
                       FUN.VALUE = numeric(1))
     
     id <- names(which.max(common))
+    
+    if(max(common) == 0){
+      message("Warning! --- No genes found in DB! --- Check genome parameter.
+Return NULL\n")
+      return(NULL)
+    }
+    
     message("Checking DB. The best overlap with [",id,"] gene IDs:",
             max(common),"\n")
   }
