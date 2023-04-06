@@ -75,9 +75,13 @@ consICA <- function(X,
       return(NULL)
     }
   
+    if (!is.null(filter.thr)) {
+      ind <- apply(assay(X),1,max)>filter.thr
+      X <-  X[ind,]
+    }
     Xse <- X
+  
     X <- as.matrix(assay(X))
-    if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr, , drop=FALSE]
 
     Res <- list() # output
     Res$X <- Xse
@@ -306,13 +310,15 @@ oneICA <- function(X,
       return(NULL)
     }
   
+    ## create containers
+    if (!is.null(filter.thr)) {
+      ind <- apply(assay(X),1,max)>filter.thr
+      X <-  X[ind,]
+    }
     Xse <- X
     X <- as.matrix(assay(X))    
-    Res <- list()
     
-    ## create containers
-    X <- as.matrix(X)
-    if (!is.null(filter.thr)) X <- X[apply(X,1,max)>filter.thr, ,drop=FALSE]
+    Res <- list()
     if (!reduced) Res$X <- Xse
     
     ## matrix of signal
