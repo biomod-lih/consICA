@@ -34,7 +34,7 @@ Encoding: UTF-8
 LazyData: false
 Imports: fastICA (>= 1.2.1), 
     sm, org.Hs.eg.db, GO.db, stats, SummarizedExperiment,
-    BiocParallel, graph, methods,
+    BiocParallel, graph, methods, Rfast,
     pheatmap, survival, topGO, graphics, grDevices
 Depends: R (>= 4.2.0)
 Suggests: knitr, BiocStyle, rmarkdown, testthat

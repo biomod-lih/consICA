@@ -13,7 +13,6 @@ consICA(
   ncores = 1,
   bpparam = NULL,
   reduced = FALSE,
-  exclude = TRUE,
   fun = "logcosh",
   alg.typ = "deflation",
   verbose = FALSE
@@ -24,7 +23,7 @@ consICA(
 features in rows and samples in columns. 
 See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
 
-\item{ncomp}{number of components.}
+\item{ncomp}{number of components}
 
 \item{ntry}{number of consensus runs. Default value is 1}
 
@@ -41,9 +40,6 @@ value is 1}
 
 \item{reduced}{If TRUE returns reduced result (no `X`, `i.best`, 
 see 'return')}
-
-\item{exclude}{are samples excluded during multiple run? If TRUE one random 
-sample will be excluded per run. Default is TRUE}
 
 \item{fun}{the functional form of the G function used in the approximation 
 to neg-entropy in fastICA. Default value is "logcosh"}
@@ -67,7 +63,8 @@ a list with
         \item{i.best}{number of best iteration}
 }
 \description{
-calculate consensus independent component analysis (ICA)
+calculate consensus independent component analysis (ICA) 
+Implements efficient ICA calculations.
 }
 \examples{
 data("samples_data")

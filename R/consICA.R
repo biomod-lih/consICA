@@ -1,9 +1,10 @@
 #' @title Calculate consensus Independent Component Analysis 
 #' @description calculate consensus independent component analysis (ICA) 
+#' Implements efficient ICA calculations.
 #' @param X a `SummarizedExperiment` object. Assay used as data matrix with 
 #' features in rows and samples in columns. 
 #' See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
-#' @param ncomp number of components. 
+#' @param ncomp number of components
 #' @param ntry number of consensus runs. Default value is 1
 #' @param show.every numeric logging period in iterations (disabled for 
 #' `ncore`s > 1). Default value is 1
@@ -14,8 +15,6 @@
 #' @param bpparam parameters from the `BiocParallel`
 #' @param reduced If TRUE returns reduced result (no `X`, `i.best`, 
 #' see 'return')
-#' @param exclude are samples excluded during multiple run? If TRUE one random 
-#' sample will be excluded per run. Default is TRUE 
 #' @param fun the functional form of the G function used in the approximation 
 #' to neg-entropy in fastICA. Default value is "logcosh"
 #' @param alg.typ parameter for fastICA(). If alg.typ == "deflation" the 
@@ -44,7 +43,7 @@
 #' @seealso \code{\link[fastICA]{fastICA}}
 #' @export
 
-#' @importFrom fastICA fastICA
+#' @importFrom fastICA fastICA ica.R.def ica.R.par
 #' @importFrom BiocParallel bplapply SnowParam MulticoreParam bpparam
 #' @import topGO org.Hs.eg.db 
 #' @import GO.db 
@@ -53,9 +52,11 @@
 #' @importFrom graphics axis barplot box boxplot legend lines par plot.new 
 #' plot.window points polygon rect text title
 #' @importFrom grDevices dev.off pdf
-#' @importFrom stats aov cor density mad median p.adjust pnorm quantile rexp
+#' @importFrom stats aov cor density mad median p.adjust pnorm quantile rexp 
+#' rnorm
 #' @importFrom SummarizedExperiment assay colData
 #' @importFrom methods new
+#' @importFrom Rfast mat.mult
 
 consICA <- function(X, 
                     ncomp=10,
@@ -65,7 +66,6 @@ consICA <- function(X,
                     ncores=1,
                     bpparam=NULL,
                     reduced=FALSE,
-                    exclude=TRUE,
                     fun="logcosh",
                     alg.typ="deflation",
                     verbose=FALSE){
@@ -102,21 +102,21 @@ consICA <- function(X,
     Res$S <- S[[1]]
     Res$M <- M[[1]]
     Res$mr2 <- NA  ## mean correlation bw mixing profiles
-    ## do multiple tries
-    idx.excludeSamples <- sample(seq.int(1,ncol(X)), 
-                                 ntry, replace = (ntry > ncol(X)))
-    if (ntry==1 | (!exclude) ) idx.excludeSamples <- integer(0)
+   
+     ## do multiple tries
     itry <- 1
     
     ###############################
     ## Parallel section starts
     ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+    preICA <- outICA(X, n.comp=ncomp, verbose = verbose)
+    
     if(verbose){
       message("*** Starting ",ifelse(ncores>1,"parallel ",""),"calculation on ",
           ncores,"core(s)...\n")
       message("*** System: ",.Platform$OS.type,"\n")
-      message("***",ncomp," components, ",ntry," runs, ",nrow(X)," features, ",
+      message("*** ",ncomp," components, ",ntry," runs, ",nrow(X)," features, ",
           ncol(X),"samples.\n")
       message("*** Start time: ",as.character(Sys.time()),"\n")
     }
@@ -124,26 +124,20 @@ consICA <- function(X,
     ## multi run ICA
     if (ncores > 1) {
       
-      par_fica <- function(x=x, Res=Res,Z,ncomp=ncomp,alg.typ=alg.typ,fun=fun,
-                           idx.excludeSamples=idx.excludeSamples){
+      par_fica <- function(x=x, Res=Res,Z,ncomp=ncomp,alg.typ=alg.typ,fun=fun){
         suppressPackageStartupMessages({
-          requireNamespace("fastICA") 
+          requireNamespace("fastICA")
+          requireNamespace("Rfast")
         })
 
         SP <- Res$S + NA
         MP <- Res$M + NA
 
-        if (length(idx.excludeSamples) == 0){
-          ic <- fastICA(Z,n.comp=ncomp,alg.typ=alg.typ,fun=fun)
-          SP[,] <- ic$S
-          MP[,] <- ic$A
-        }else{
-          z <- Z[,-idx.excludeSamples[x]]
-          ic <- fastICA(z,n.comp=ncomp,alg.typ=alg.typ,fun=fun)
-          SP[,] <- ic$S
-          MP[,-idx.excludeSamples[x]] <- ic$A
-          MP[is.na(MP)] <- 0
-        }
+        #ic <- fastICA(Z,n.comp=ncomp,alg.typ=alg.typ,fun=fun)
+        ic <- coreICA(Z, n.comp=ncomp,preICA=preICA, alg.typ=alg.typ,fun=fun)
+        SP[,] <- ic$S
+        MP[,] <- ic$A
+        
         return(list(S=SP,M=MP))
       }
       
@@ -151,8 +145,7 @@ consICA <- function(X,
       bp_param$progressbar <- TRUE
       seqntry <- seq.int(ntry)
       MRICA <- bplapply(X=seqntry, FUN = par_fica, BPPARAM = bp_param,
-                        Res=Res,Z=X,ncomp=ncomp,alg.typ=alg.typ,fun=fun,
-                        idx.excludeSamples=idx.excludeSamples)
+                        Res=Res,Z=X,ncomp=ncomp,alg.typ=alg.typ,fun=fun)
 
     }else{
       if(verbose){
@@ -167,17 +160,12 @@ consICA <- function(X,
             MRICA[[itry]] <- list()
             MRICA[[itry]]$S <- Res$S + NA
             MRICA[[itry]]$M <- Res$M + NA
-            if (length(idx.excludeSamples) == 0){
-                ic <- fastICA(X, n.comp=ncomp, alg.typ=alg.typ,fun=fun)
-                MRICA[[itry]]$S[,] <- ic$S
-                MRICA[[itry]]$M[,] <- ic$A
-            }else{
-                x <- X[,-idx.excludeSamples[itry]]
-                ic <- fastICA(x, n.comp=ncomp, alg.typ=alg.typ,fun=fun)
-                MRICA[[itry]]$S[,] <- ic$S
-                MRICA[[itry]]$M[,-idx.excludeSamples[itry]] <- ic$A
-                MRICA[[itry]]$M[is.na(MRICA[[itry]]$M)] <- 0
-            }
+            
+            #ic <- fastICA(X, n.comp=ncomp, alg.typ=alg.typ,fun=fun)
+            ic <- coreICA(X, n.comp=ncomp,preICA=preICA, alg.typ=alg.typ,fun=fun)
+            MRICA[[itry]]$S[,] <- ic$S
+            MRICA[[itry]]$M[,] <- ic$A
+            
             if (itry%%show.every == 0 & show.every > 0) {
               if(verbose) message("try #",itry," of ",ntry,"\n")
             }
