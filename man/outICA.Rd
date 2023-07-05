@@ -9,12 +9,12 @@ outICA(X, n.comp, row.norm = FALSE, verbose = FALSE)
 \arguments{
 \item{X}{matrix with features in rows and samples in columns}
 
+\item{n.comp}{number of components}
+
 \item{row.norm}{rows normalization flag. Default value is FALSE}
 
 \item{verbose}{logic TRUE or FALSE. Use TRUE for print process steps. 
 Default value is FALSE}
-
-\item{ncomp}{number of components.}
 }
 \value{
 a list with 

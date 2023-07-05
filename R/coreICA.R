@@ -2,7 +2,7 @@
 #' @description Calculate a common part for consensus Independent Component 
 #' Analysis (ICA)
 #' @param X matrix with features in rows and samples in columns
-#' @param ncomp number of components. 
+#' @param n.comp number of components
 #' @param row.norm rows normalization flag. Default value is FALSE
 #' @param verbose logic TRUE or FALSE. Use TRUE for print process steps. 
 #'     Default value is FALSE
