@@ -311,3 +311,55 @@ set_bpparam <- function(ncores = 0, BPPARAM = NULL){
     return(BPPARAM)
   }
 }
+
+#' @title Convert input object as numeric matrix
+#' @param X input data with features in rows and samples in columns. 
+#' Could be a `SummarizedExperiment` object, matrix or `Seurat` object. 
+#' For `SummarizedExperiment` with multiple assays or `Seurat` pass the name 
+#' with `assay_string` parameter, otherwise the first will be taken.
+#' See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
+#' @param assay_string name of assay for `SummarizedExperiment` or `Seurat` 
+#' input object `X`. Default value is NULL
+#' @return matrix
+get_X_num <- function(obj, assay_string = NULL){
+  
+  if(! (inherits (obj, "SummarizedExperiment") | inherits (obj, "matrix") | 
+        inherits (obj, "Seurat")) ){
+    message("Input must be a matrix, SummarizedExperiment or Seurat object")
+    return(NULL)
+  }
+  
+  if(inherits (obj, "SummarizedExperiment")){
+    
+    if(is.null(assay_string)){
+      X_num <- as.matrix(assay(obj))
+    } else {
+      if(length(which(names(SummarizedExperiment::assays(obj)) == assay_string)) == 0){
+        message(
+          "Given name of assay was not found in X. Check `assay_string`")
+        return(NULL)
+      }
+      X_num <- as.matrix(SummarizedExperiment::assays(obj)[[assay_string]])
+    }
+  }
+  
+  if(inherits (obj, "matrix")){
+    X_num <- obj
+  }
+
+  if(inherits (obj, "Seurat")){
+    suppressPackageStartupMessages({
+      requireNamespace("Seurat")
+    })
+    
+    if(is.null(assay_string)) assay_string <- "data"
+    
+    if(length(which(c("data","counts","scale.data") == assay_string)) == 0){
+      message(
+        "Given name of assay was not found in X. Check `assay_string`")
+      #return(NULL)
+    }
+    X_num <- as.matrix(GetAssayData(object = obj, slot = assay_string))
+  }
+  return(X_num)
+}

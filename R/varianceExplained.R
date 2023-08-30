@@ -20,10 +20,14 @@ estimateVarianceExplained <- function(cica, X=NULL) {
       message("First parameter should be compliant to `consICA()` result\n")
       return (NULL)
     }
-    if(!is.null(cica$X))  X <- cica$X
+
+    if(!is.null(cica$X_num)){
+      X <- cica$X_num
+    } else {
+      X <- get_X_num(cica$X, assay_string = cica$assay_name)
+    }
     if(is.null(X))  return (NULL)
     
-    X <- as.matrix(assay(X))
     S <- cica$S # G x C
     M <- cica$M # C x S
     

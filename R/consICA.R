@@ -1,15 +1,17 @@
 #' @title Calculate consensus Independent Component Analysis 
 #' @description calculate consensus independent component analysis (ICA) 
 #' Implements efficient ICA calculations.
-#' @param X a `SummarizedExperiment` object. Assay used as data matrix with 
-#' features in rows and samples in columns. 
+#' @param X input data with features in rows and samples in columns. 
+#' Could be a `SummarizedExperiment` object, matrix or `Seurat` object. 
+#' For `SummarizedExperiment` with multiple assays or `Seurat` pass the name 
+#' with `assay_string` parameter, otherwise the first will be taken.
 #' See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
 #' @param ncomp number of components
 #' @param ntry number of consensus runs. Default value is 1
 #' @param show.every numeric logging period in iterations (disabled for 
 #' `ncore`s > 1). Default value is 1
-#' @param filter.thr Filter out genes (rows) with values lower than this value 
-#' from `X` 
+#' @param filter.thr Filter out genes (rows) with max value lower than this 
+#' value from `X` 
 #' @param ncores number of cores to be set for parallel calculation. Default 
 #' value is 1
 #' @param bpparam parameters from the `BiocParallel`
@@ -22,11 +24,14 @@
 #' components are extracted simultaneously. Default value is "deflation"
 #' @param verbose logic TRUE or FALSE. Use TRUE for print process steps. 
 #'     Default value is FALSE
+#' @param assay_string name of assay for `SummarizedExperiment` or `Seurat` 
+#' input object `X`. Default value is NULL
 #' @return a list with
-#'         \item{X}{input `SummarizedExperiment` object}
+#'         \item{X}{input object}
 #'         \item{nsamples, nfeatures}{dimension of X}
 #'         \item{S, M}{consensus metagene and weight matrix}
 #'         \item{ncomp}{number of components}
+#'         \item{X_num}{input data in matrix format}
 #'         \item{mr2}{mean R2 between rows of M}
 #'         \item{stab}{stability, mean R2 between consistent columns of S in 
 #'         multiple tries. Applicable only for `ntry` > 1}
@@ -68,25 +73,77 @@ consICA <- function(X,
                     reduced=FALSE,
                     fun="logcosh",
                     alg.typ="deflation",
-                    verbose=FALSE){
+                    verbose=FALSE,
+                    assay_string = NULL){
   
-    if(!inherits (X, "SummarizedExperiment")){
-      message("X must be a SummarizedExperiment object")
+    if(! (inherits (X, "SummarizedExperiment") | inherits (X, "matrix") | 
+        inherits (X, "Seurat")) ){
+      message("X must be a matrix, SummarizedExperiment or Seurat object")
       return(NULL)
     }
   
-    if (!is.null(filter.thr)) {
-      ind <- apply(assay(X),1,max)>filter.thr
-      X <-  X[ind,]
+    if(inherits (X, "SummarizedExperiment")){
+      
+      if(is.null(assay_string)){
+        if (!is.null(filter.thr)) {
+          ind <- apply(assay(X),1,max)>filter.thr
+          X <-  X[ind,]
+        }
+        Xse <- X
+        X <- as.matrix(assay(X))
+      } else {
+        if(length(which(names(SummarizedExperiment::assays(X)) == 
+                                                        assay_string)) == 0){
+          message(
+            "Given name of assay was not found in X. Check `assay_string`")
+          return(NULL)
+        }
+        if (!is.null(filter.thr)) {
+          ind <- apply(SummarizedExperiment::assays(X)[[assay_string]],1,max) >
+                                                                    filter.thr
+          X <-  X[ind,]
+        }
+        Xse <- X
+        X <- as.matrix(SummarizedExperiment::assays(X)[[assay_string]])
+      }
     }
-    Xse <- X
   
-    X <- as.matrix(assay(X))
-
+    if(inherits (X, "matrix")){
+      if (!is.null(filter.thr)) {
+        ind <- apply(X,1,max)>filter.thr
+        X <-  X[ind,]
+      }
+      Xse <- X
+    }
+  
+    if(inherits (X, "Seurat")){
+      suppressPackageStartupMessages({
+        requireNamespace("Seurat")
+      })
+      
+      if(is.null(assay_string)) assay_string <- "data"
+      
+      if(length(which(c("data","counts","scale.data") == assay_string)) == 0){
+        message(
+          "Given name of assay was not found in X. Check `assay_string`")
+        #return(NULL)
+      }
+      
+      if (!is.null(filter.thr)) {
+        ind <- apply(as.matrix(
+                          GetAssayData(object = X, slot = assay_string)
+                      ),1,max)>filter.thr
+        X <-  subset(X, features = rownames(X)[ind])
+      }
+      Xse <- X
+      X <- as.matrix(GetAssayData(object = X, slot = assay_string))
+    }
+  
     Res <- list() # output
     Res$X <- Xse
     S <- list()
     M <- list()
+    Res$X_num <- X
     
     ## metagenes  - matrix of features
     S[[1]] <- matrix(nrow=nrow(X),ncol=ncomp)
@@ -162,7 +219,7 @@ consICA <- function(X,
             MRICA[[itry]]$M <- Res$M + NA
             
             #ic <- fastICA(X, n.comp=ncomp, alg.typ=alg.typ,fun=fun)
-            ic <- coreICA(X, n.comp=ncomp,preICA=preICA, alg.typ=alg.typ,fun=fun)
+            ic <- coreICA(X, n.comp=ncomp,preICA=preICA,alg.typ=alg.typ,fun=fun)
             MRICA[[itry]]$S[,] <- ic$S
             MRICA[[itry]]$M[,] <- ic$A
             
@@ -249,12 +306,15 @@ consICA <- function(X,
     
     if (reduced) {
         Res$X <- NULL
+        Res$X_num <- NULL
         Res$i.best <- NULL
     }
     
     Res$ncomp  <- ncomp
     Res$nsamples <- ncol(X)
     Res$nfeatures <- nrow(X)
+    if(!is.null(assay_string)) Res$assay_name <- assay_string
+    
     if(verbose) message("consensus ICA done\n")
     return(Res)
 }
@@ -262,8 +322,10 @@ consICA <- function(X,
 #' @title Runs \code{\link[fastICA]{fastICA}}
 #' @description Runs \code{\link[fastICA]{fastICA}} once and store in a 
 #' consICA manner
-#' @param X a `SummarizedExperiment` object. Assay used as data matrix with 
-#' features in rows and samples in columns. 
+#' @param X input data with features in rows and samples in columns. 
+#' Could be a `SummarizedExperiment` object, matrix or `Seurat` object. 
+#' For `SummarizedExperiment` with multiple assays or `Seurat` pass the name 
+#' with `assay_string` parameter, otherwise the first will be taken.
 #' See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
 #' @param ncomp number of components. Default value is 10
 #' @param filter.thr filter rows in input matrix with max value > `filter.thr`.
@@ -275,6 +337,8 @@ consICA <- function(X,
 #' components are extracted one 
 #' at a time. if alg.typ == "parallel" the components are extracted 
 #' simultaneously. Default value is "deflation"
+#' @param assay_string name of assay for `SummarizedExperiment` or `Seurat` 
+#' input object `X`. Default value is NULL
 #' @return a list with
 #'         \item{X}{input `SummarizedExperiment` object}
 #'         \item{nsamples, nfeatures}{dimension of X assay}
@@ -291,20 +355,77 @@ oneICA <- function(X,
                   filter.thr=NULL,
                   reduced=FALSE, 
                   fun="logcosh", 
-                  alg.typ="deflation"){ 
+                  alg.typ="deflation",
+                  assay_string=NULL){ 
   
-    if(!inherits (X, "SummarizedExperiment")){
-      message("X must be a SummarizedExperiment object")
+    if(! (inherits (X, "SummarizedExperiment") | inherits (X, "matrix") | 
+          inherits (X, "Seurat")) ){
+      message("X must be a matrix, SummarizedExperiment or Seurat object")
       return(NULL)
     }
   
     ## create containers
-    if (!is.null(filter.thr)) {
-      ind <- apply(assay(X),1,max)>filter.thr
-      X <-  X[ind,]
+    # if (!is.null(filter.thr)) {
+    #   ind <- apply(assay(X),1,max)>filter.thr
+    #   X <-  X[ind,]
+    # }
+    # Xse <- X
+    # X <- as.matrix(assay(X))    
+    
+    if(inherits (X, "SummarizedExperiment")){
+      
+      if(is.null(assay_string)){
+        if (!is.null(filter.thr)) {
+          ind <- apply(assay(X),1,max)>filter.thr
+          X <-  X[ind,]
+        }
+        Xse <- X
+        X <- as.matrix(assay(X))
+      } else {
+        if(length(which(names(SummarizedExperiment::assays(X)) == assay_string)) == 0){
+          message(
+            "Given name of assay was not found in X. Check `assay_string`")
+          return(NULL)
+        }
+        if (!is.null(filter.thr)) {
+          ind <- apply(SummarizedExperiment::assays(X)[[assay_string]],1,max)>filter.thr
+          X <-  X[ind,]
+        }
+        Xse <- X
+        X <- as.matrix(SummarizedExperiment::assays(X)[[assay_string]])
+      }
     }
-    Xse <- X
-    X <- as.matrix(assay(X))    
+    
+    if(inherits (X, "matrix")){
+      if (!is.null(filter.thr)) {
+        ind <- apply(X,1,max)>filter.thr
+        X <-  X[ind,]
+      }
+      Xse <- X
+    }
+    
+    if(inherits (X, "Seurat")){
+      suppressPackageStartupMessages({
+        requireNamespace("Seurat")
+      })
+      
+      if(is.null(assay_string)) assay_string <- "data"
+      
+      if(length(which(c("data","counts","scale.data") == assay_string)) == 0){
+        message(
+          "Given name of assay was not found in X. Check `assay_string`")
+        #return(NULL)
+      }
+      
+      if (!is.null(filter.thr)) {
+        ind <- apply(as.matrix(
+          GetAssayData(object = X, slot = assay_string)
+        ),1,max)>filter.thr
+        X <-  subset(X, features = rownames(X)[ind])
+      }
+      Xse <- X
+      X <- as.matrix(GetAssayData(object = X, slot = assay_string))
+    }
     
     Res <- list()
     if (!reduced) Res$X <- Xse
@@ -330,6 +451,7 @@ oneICA <- function(X,
     Res$ncomp <- ncomp
     Res$nsamples <- ncol(X)
     Res$nfeatures <- nrow(X)
+    if(!is.null(assay_string)) Res$assay_name <- assay_string
     
     return(Res)
 }

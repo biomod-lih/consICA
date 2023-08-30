@@ -10,12 +10,15 @@ oneICA(
   filter.thr = NULL,
   reduced = FALSE,
   fun = "logcosh",
-  alg.typ = "deflation"
+  alg.typ = "deflation",
+  assay_string = NULL
 )
 }
 \arguments{
-\item{X}{a `SummarizedExperiment` object. Assay used as data matrix with 
-features in rows and samples in columns. 
+\item{X}{input data with features in rows and samples in columns. 
+Could be a `SummarizedExperiment` object, matrix or `Seurat` object. 
+For `SummarizedExperiment` with multiple assays or `Seurat` pass the name 
+with `assay_string` parameter, otherwise the first will be taken.
 See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
 
 \item{ncomp}{number of components. Default value is 10}
@@ -32,6 +35,9 @@ to neg-entropy in fastICA. Default value is "logcosh"}
 components are extracted one 
 at a time. if alg.typ == "parallel" the components are extracted 
 simultaneously. Default value is "deflation"}
+
+\item{assay_string}{name of assay for `SummarizedExperiment` or `Seurat` 
+input object `X`. Default value is NULL}
 }
 \value{
 a list with

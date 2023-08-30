@@ -15,12 +15,15 @@ consICA(
   reduced = FALSE,
   fun = "logcosh",
   alg.typ = "deflation",
-  verbose = FALSE
+  verbose = FALSE,
+  assay_string = NULL
 )
 }
 \arguments{
-\item{X}{a `SummarizedExperiment` object. Assay used as data matrix with 
-features in rows and samples in columns. 
+\item{X}{input data with features in rows and samples in columns. 
+Could be a `SummarizedExperiment` object, matrix or `Seurat` object. 
+For `SummarizedExperiment` with multiple assays or `Seurat` pass the name 
+with `assay_string` parameter, otherwise the first will be taken.
 See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
 
 \item{ncomp}{number of components}
@@ -30,8 +33,8 @@ See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
 \item{show.every}{numeric logging period in iterations (disabled for 
 `ncore`s > 1). Default value is 1}
 
-\item{filter.thr}{Filter out genes (rows) with values lower than this value 
-from `X`}
+\item{filter.thr}{Filter out genes (rows) with max value lower than this 
+value from `X`}
 
 \item{ncores}{number of cores to be set for parallel calculation. Default 
 value is 1}
@@ -50,13 +53,17 @@ components are extracted simultaneously. Default value is "deflation"}
 
 \item{verbose}{logic TRUE or FALSE. Use TRUE for print process steps. 
 Default value is FALSE}
+
+\item{assay_string}{name of assay for `SummarizedExperiment` or `Seurat` 
+input object `X`. Default value is NULL}
 }
 \value{
 a list with
-        \item{X}{input `SummarizedExperiment` object}
+        \item{X}{input object}
         \item{nsamples, nfeatures}{dimension of X}
         \item{S, M}{consensus metagene and weight matrix}
         \item{ncomp}{number of components}
+        \item{X_num}{input data in matrix format}
         \item{mr2}{mean R2 between rows of M}
         \item{stab}{stability, mean R2 between consistent columns of S in 
         multiple tries. Applicable only for `ntry` > 1}
