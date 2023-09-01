@@ -313,7 +313,7 @@ set_bpparam <- function(ncores = 0, BPPARAM = NULL){
 }
 
 #' @title Convert input object as numeric matrix
-#' @param X input data with features in rows and samples in columns. 
+#' @param obj input data with features in rows and samples in columns. 
 #' Could be a `SummarizedExperiment` object, matrix or `Seurat` object. 
 #' For `SummarizedExperiment` with multiple assays or `Seurat` pass the name 
 #' with `assay_string` parameter, otherwise the first will be taken.
