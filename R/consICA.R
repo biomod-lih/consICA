@@ -139,6 +139,11 @@ consICA <- function(X,
       X <- as.matrix(GetAssayData(object = X, slot = assay_string))
     }
   
+    if(length(X) == 0){
+      message("After filtering input matrix is empty. Check `filter.thr`\n")
+      return(NULL)
+    }
+  
     Res <- list() # output
     Res$X <- Xse
     S <- list()
