@@ -319,7 +319,7 @@ set_bpparam <- function(ncores = 0, BPPARAM = NULL){
 #' with `assay_string` parameter, otherwise the first will be taken.
 #' See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}
 #' @param assay_string name of assay for `SummarizedExperiment` or `Seurat` 
-#' input object `X`. Default value is NULL
+#' input object `obj`. Default value is NULL
 #' @return matrix
 get_X_num <- function(obj, assay_string = NULL){
   

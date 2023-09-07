@@ -1,4 +1,4 @@
-#' @title ANOVA test independent component ~ factor
+#' @title ANOVA test for independent component across factors
 #' @description ANOVA (ANalysis Of VAriance) test produced for specific 
 #' independent component across each (clinical) factor as `aov(IC ~ factor)`.
 #' Plot distributions of samples' weight for top 9 significant factors.
@@ -17,6 +17,7 @@
 #' data("samples_data")
 #' Var <- data.frame(SummarizedExperiment::colData(samples_data))
 #' cica <-  consICA(samples_data, ncomp=10, ntry=1, ncores=1, show.every=0)
+#' # Run ANOVA for 4th independent component
 #' anova <- anovaIC(cica, Var=Var, icomp = 4)
 #' @export
 #' @import ggplot2
@@ -96,3 +97,104 @@ anovaIC <- function(cica, Var=NULL, icomp = 1, plot = TRUE, mode = "violin",
   message("`Var` is empty. Return NULL")
   return(NULL)
 }
+
+#' @title Similarity of two gene ontologies lists
+#' @description Calculate similarity matrix of gene ontilogies (GOs) 
+#' of independent components. The measure could be cosine similarity or
+#' Jaccard index (see details)
+#' @param GO1 list of GOs for each independent component got from `getGO()`
+#' @param GO2 list of GOs for each independent component got from `getGO()`
+#' @param method can be 'cosine' for non-parametric cosine similarity  or 
+#' 'jaccard' for Jaccadr index. See details
+#' @param fdr FDR threshold for GOs that would be used in measures. 
+#' Default value is 0.01
+#' @return a similarity matrix of cosine or Jaccard values, 
+#' rows corresponds to independent components in `GO1`, 
+#' columns to independent components in `GO2`.
+#' @details 
+#' Jaccard index is a measure of the similarity between two sets of data. 
+#' It calculated as intersection divided by union \deqn{J(A, B) = |A∩B| / |A∪B|}
+#' Results are from 0 to 1.
+#' 
+#' Cosine similarity here is calculated in a non-parametric way: 
+#' for two vectors of gene ontologies, the space is created as a union of GOs 
+#' in both vectors.
+#' Then, two rank vectors in this space created, 
+#' most enriched GOs get the biggest rank and GOs from space not included in 
+#' the GO vector get 0.
+#' Cosine similarity is calculated between two scaled rank vectors. 
+#' Such approach allows to
+#' take the order of enriched GO into account.
+#' Results are from -1 to 1. Zero means no similarity.
+#' @author Maryna Chepeleva
+#' @examples
+#' data("samples_data")
+#' # Calculate ICA (run with ntry=1 for quick test, use more in real analysis)
+#' cica1 <- consICA(samples_data, ncomp=5, ntry=1, show.every=0)
+#' # Search enriched gene ontologies
+#' cica1 <- getGO(cica1, db = "BP")
+#' # Calculate ICA and GOs for another dataset
+#' cica2 <- consICA(samples_data[,1:100], ncomp=4, ntry=1, show.every=0) 
+#' cica2 <- getGO(cica2, db = "BP")
+
+#' # Compare two lists of enriched GOs 
+#' # Jaccard index
+#' jc <- overlapGO(GO1 = cica1$GO$GOBP, GO2 = cica2$GO$GOBP, 
+#' method = "jaccard", fdr = 0.01)
+#' # Cosine similarity
+#' cos_sim <- overlapGO(GO1 = cica1$GO$GOBP, GO2 = cica2$GO$GOBP, 
+#' method = "cosine", fdr = 0.01)
+#' @export
+overlapGO <- function(GO1, GO2, method = c("cosine", "jaccard"), fdr = 0.01){
+  
+  method <- method[1]
+  if(length(which(method == c("cosine", "jaccard"))) == 0){
+    message("`method` should be 'cosine' or 'jaccard'. Return NULL.\n")
+    return(NULL)
+  }
+  
+  if(method == "jaccard"){
+    jac_mat <- matrix(0, nrow = length(GO1), ncol = length(GO2))
+    for(i in seq.int(1, length(GO1))){
+      for(j in seq.int(1, length(GO2))){
+        go_vector1 <- GO1[[i]]$pos[GO1[[i]]$pos$FDR <= fdr,]$GO.ID
+        go_vector2 <- GO2[[j]]$pos[GO2[[j]]$pos$FDR <= fdr,]$GO.ID
+        if(length(go_vector1) == 0 | length(go_vector2) == 0) next
+        jac_mat[i,j] <- length(intersect(go_vector1, go_vector2)) / length(union(go_vector1, go_vector2))
+      }
+    }
+    rownames(jac_mat) <- names(GO1)
+    colnames(jac_mat) <- names(GO2)
+    return(jac_mat)
+  }
+  
+  if(method == "cosine"){
+    cos_mat <- matrix(0, nrow = length(GO1), ncol = length(GO2))
+    for(i in seq.int(1, length(GO1))){
+      for(j in seq.int(1, length(GO2))){
+        go_rank1 <- GO1[[i]]$pos[GO1[[i]]$pos$FDR <= fdr,]
+        go_rank2 <- GO2[[j]]$pos[GO2[[j]]$pos$FDR <= fdr,]
+        if(nrow(go_rank1) == 0 | nrow(go_rank2) == 0) next
+        go_rank1$RANK1 <- seq.int(nrow(go_rank1),1)
+        go_rank2$RANK2 <- seq.int(nrow(go_rank2),1)
+        rank_df <- merge(go_rank1[,c("GO.ID","RANK1")], 
+                         go_rank2[,c("GO.ID","RANK2")], by = "GO.ID",all = TRUE)     
+        rank_df[is.na(rank_df)] <- 0
+        rank_df$RANK1  <- (rank_df$RANK1 - min(rank_df$RANK1)) / 
+          (max(rank_df$RANK1) - min(rank_df$RANK1)) * (1-0) + 0
+        rank_df$RANK2  <- (rank_df$RANK2 - min(rank_df$RANK2)) / 
+          (max(rank_df$RANK2) - min(rank_df$RANK2)) * (1-0) + 0
+        cos_mat[i,j] <- crossprod(rank_df$RANK1, rank_df$RANK2)/
+          sqrt(crossprod(rank_df$RANK1) * crossprod(rank_df$RANK2))
+      }
+    }
+    rownames(cos_mat) <- names(GO1)
+    colnames(cos_mat) <- names(GO2)
+    return(cos_mat)
+  }
+ return(NULL)
+}
+
+
+
+

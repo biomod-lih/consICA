@@ -2,7 +2,7 @@
 % Please edit documentation in R/functionsAnalysis.R
 \name{anovaIC}
 \alias{anovaIC}
-\title{ANOVA test independent component ~ factor}
+\title{ANOVA test for independent component across factors}
 \usage{
 anovaIC(
   cica,
@@ -42,5 +42,6 @@ Plot distributions of samples' weight for top 9 significant factors.
 data("samples_data")
 Var <- data.frame(SummarizedExperiment::colData(samples_data))
 cica <-  consICA(samples_data, ncomp=10, ntry=1, ncores=1, show.every=0)
+# Run ANOVA for 4th independent component
 anova <- anovaIC(cica, Var=Var, icomp = 4)
 }

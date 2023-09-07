@@ -174,7 +174,7 @@ saveReport <- function(cica, Genes=NULL, Var=NULL, surv=NULL,
     }
     
     if (!is.null(Var)){
-      #td check whetehr factor is adequate (number of levels and NAs)
+      #td check whether factor is adequate (number of levels and NAs)
       pv <- double(ncol(Var))+1
       names(pv) <- names(Var)
       for (ifact in seq.int(1,ncol(Var))){

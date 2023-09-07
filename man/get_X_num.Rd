@@ -7,14 +7,14 @@
 get_X_num(obj, assay_string = NULL)
 }
 \arguments{
-\item{assay_string}{name of assay for `SummarizedExperiment` or `Seurat` 
-input object `X`. Default value is NULL}
-
-\item{X}{input data with features in rows and samples in columns. 
+\item{obj}{input data with features in rows and samples in columns. 
 Could be a `SummarizedExperiment` object, matrix or `Seurat` object. 
 For `SummarizedExperiment` with multiple assays or `Seurat` pass the name 
 with `assay_string` parameter, otherwise the first will be taken.
 See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
+
+\item{assay_string}{name of assay for `SummarizedExperiment` or `Seurat` 
+input object `obj`. Default value is NULL}
 }
 \value{
 matrix
