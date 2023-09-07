@@ -93,6 +93,18 @@ Estimate the variance explained by the independent components with `estimateVari
 var_ic <- estimateVarianceExplained(cica)
 p <- plotICVarianceExplained(cica)
 ```
+Independent components could be linked to factors from meta data with ANOVA.
+```{r}
+## Run ANOVA for components 1 and 5
+# Get metadata from SummarizedExperiment object
+# Var <- data.frame(SummarizedExperiment::colData(samples_data))
+var_ic1 <- anovaIC(cica, Var, icomp = 1, color_by_pv = TRUE, plot = TRUE)
+var_ic5 <- anovaIC(cica, Var, icomp = 5, mode = 'box', plot = FALSE)
+
+head(var_ic1, 3)
+head(var_ic5, 5)
+```
+In this example 1st component isolated gender differences. To remove them, the reconstruction of initial matrix could be done with zero weights for first component.
 
 # Enrichment analysis
 For each component we can carry out an enrichment analysis. The genes with expression above the selected threshold in at least one sample, were used as a background gene list and significantly overrepresented(adj.p-value < `alpha`) GO terms. You can select the DB for search: biological process ("BP"), molecular function ("MF") and/or cellular component ("CC").
@@ -111,11 +123,14 @@ if(!file.exists("cica_GOs_20_s2022.rds")){
 } else{
   cica <- readRDS("cica_GOs_20_s2022.rds")
 }
+
 ## Search GO (biological process)
 # cica <- getGO(cica, alpha = 0.05, db = "BP")
 ## Search GO (biological process, molecular function, cellular component)
 # cica <- getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
 ```
+
+You can compare lists of enriched GO from different runs or datasets. See function `overlapGO()` for more.
 
 # Survival analysis
 Weights of the components (rows of matrix M) can be statistically linked to patient survival using Cox partial hazard regression [4]. In `survivalAnalysis` function adjusted p-values of the log-rank test are used to select significant components. However, the prognostic power of each individual component might not have been high enough to be applied to the patients from the new cohort. Therefore, `survivalAnalysis` integrates weights of several components, calculating the risk score (RS) with improved prognostic power. For each sample, its RS is the sum of the products of significant log-hazard ratios (LHR) of the univariable Cox regression, the component stability R2 and the standardized row of weight matrix M.
