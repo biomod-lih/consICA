@@ -29,8 +29,10 @@ Jaccard index (see details)
 }
 \details{
 Jaccard index is a measure of the similarity between two sets of data. 
-It calculated as intersection divided by union \deqn{J(A, B) = |A∩B| / |A∪B|}
-Results are from 0 to 1.
+It calculated as intersection divided by union \deqn{
+  J(A, B) = \frac{|A \cap B|}{|A \cup B|}.
+}
+ Results are from 0 to 1.
 
 Cosine similarity here is calculated in a non-parametric way: 
 for two vectors of gene ontologies, the space is created as a union of GOs 

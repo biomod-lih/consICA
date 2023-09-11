@@ -28,7 +28,7 @@ anovaIC <- function(cica, Var=NULL, icomp = 1, plot = TRUE, mode = "violin",
     message("First parameter should be compliant to `consICA()` result\n")
     return (NULL)
   }
-  if(length(which(icomp == seq.int(1:ncol(cica$S)))) < 1){
+  if(length(which(icomp == seq.int(1,ncol(cica$S)))) < 1){
     message("Component not found\n")
     return(NULL)
   }
@@ -59,7 +59,7 @@ anovaIC <- function(cica, Var=NULL, icomp = 1, plot = TRUE, mode = "violin",
     
     if(plot & length(top_fact)>0){
       gg_d <- as.data.frame(t(cica$M))[,icomp]
-      gg_df <- do.call(rbind, lapply(1:length(top_fact), function(x){
+      gg_df <- do.call(rbind, lapply(seq.int(1,length(top_fact)), function(x){
         cbind(data.frame(gg_d),top_fact[x],as.character(Var[,top_fact[x]]),
               tab[x,]$p.value, tab[x,]$p.value_disp)}))
       colnames(gg_df) <- c("weight", "factor_name", "factor",
@@ -113,8 +113,10 @@ anovaIC <- function(cica, Var=NULL, icomp = 1, plot = TRUE, mode = "violin",
 #' columns to independent components in `GO2`.
 #' @details 
 #' Jaccard index is a measure of the similarity between two sets of data. 
-#' It calculated as intersection divided by union \deqn{J(A, B) = |A∩B| / |A∪B|}
-#' Results are from 0 to 1.
+#' It calculated as intersection divided by union \deqn{
+#'   J(A, B) = \frac{|A \cap B|}{|A \cup B|}.
+#' }
+#'  Results are from 0 to 1.
 #' 
 #' Cosine similarity here is calculated in a non-parametric way: 
 #' for two vectors of gene ontologies, the space is created as a union of GOs 
