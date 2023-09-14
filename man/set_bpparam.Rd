@@ -21,3 +21,4 @@ Set up for the parallel computing for biocParallel
 Adapt from `FEAST`
 This function sets up the environment for parallel computing.
 }
+\keyword{internal}

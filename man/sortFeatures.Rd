@@ -23,3 +23,4 @@ Sort Genes for independent components
 #                                 "fdr" = c(0, 0.1, 0.9))))
 #sortFeatures(features)
 }
+\keyword{internal}

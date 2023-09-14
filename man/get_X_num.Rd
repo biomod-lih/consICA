@@ -22,3 +22,4 @@ matrix
 \description{
 Convert input object as numeric matrix
 }
+\keyword{internal}

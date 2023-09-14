@@ -69,6 +69,7 @@ sortDataFrame <- function(x, key, ...) {
 #' #              "neg" = data.frame("features" = c("f1", "f2", "f3"),
 #' #                                 "fdr" = c(0, 0.1, 0.9))))
 #' #sortFeatures(features)
+#' @keywords internal
 sortFeatures <- function(Genes){
   if(length(Genes) < 1){
     message("Empty Genes vector\n")
@@ -292,6 +293,7 @@ num2fact <- function(x, nlev = 4, digits=1){
 #' @param ncores number of processors
 #' @param BPPARAM bpparameter from bpparam
 #' @return BAPPARAM settings
+#' @keywords internal
 set_bpparam <- function(ncores = 0, BPPARAM = NULL){
   if (is.null(BPPARAM)) {
     if (ncores != 0) {
@@ -321,6 +323,7 @@ set_bpparam <- function(ncores = 0, BPPARAM = NULL){
 #' @param assay_string name of assay for `SummarizedExperiment` or `Seurat` 
 #' input object `obj`. Default value is NULL
 #' @return matrix
+#' @keywords internal
 get_X_num <- function(obj, assay_string = NULL){
   
   if(! (inherits (obj, "SummarizedExperiment") | inherits (obj, "matrix") | 
