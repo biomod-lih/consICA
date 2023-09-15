@@ -10,6 +10,7 @@ getGO(
   genenames = NULL,
   genome = "org.Hs.eg.db",
   db = c("BP", "CC", "MF"),
+  ncores = 4,
   rotate = TRUE
 )
 }
@@ -27,6 +28,9 @@ Ensembl, Symbol, Entrez, Alias, Genename IDs.}
 'org.Hs.eg.db'}
 
 \item{db}{name of GO database: "BP","MF","CC"}
+
+\item{ncores}{number of cores for parallel calculation. Default 
+value is 4}
 
 \item{rotate}{rotate components in `S` and `M` matricies in `cica` object 
 to set most significant Gene Ontologies as positive effective features. 
@@ -51,14 +55,18 @@ positive and `neg` for negative affecting features for each component:
 \description{
 Assigns extracted independent components to Gene Ontologies and
 rotate independent components (`S` matrix) to set most significant 
-Gene Ontologies as positive affecting features
+Gene Ontologies as positive affecting features. Set `ncores` param for 
+paralleled calculations.
 }
 \examples{
 data("samples_data")
+# Calculate ICA (run with ntry=1 for quick test, use more in real analysis)
+cica <- consICA(samples_data, ncomp=4, ntry=1, show.every=0) 
 # cica <- consICA(samples_data, ncomp=40, ntry=1, show.every=0)
-cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) # timesaving 
-example
-cica <- getGO(cica, db = "BP")
+
+# Annotate independent components with gene ontoligies
+cica <- getGO(cica, db = "BP", ncores=4)
+# Positively affected GOs for 2nd independent component
 head(cica$GO$GOBP$ic02$pos)
 }
 \author{

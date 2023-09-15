@@ -112,7 +112,7 @@ For each component we can carry out an enrichment analysis. The genes with expre
 ## To save time for this example load result of getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
 if(!file.exists("cica_GOs_20_s2022.rds")){
   
-  # Old version < 1.1.1 - GO was external object. Add it to cica and rotate if need
+  # Old version < 1.1.1 - GO was an external object. Add it to cica and rotate if need
   # GOs <- readRDS(url("http://edu.modas.lu/data/consICA/GOs_40_s2022.rds", "r"))
   # cica$GO <- GOs
   # cica <- setOrientation(cica)
@@ -125,9 +125,9 @@ if(!file.exists("cica_GOs_20_s2022.rds")){
 }
 
 ## Search GO (biological process)
-# cica <- getGO(cica, alpha = 0.05, db = "BP")
+# cica <- getGO(cica, alpha = 0.05, db = "BP", ncores = 4)
 ## Search GO (biological process, molecular function, cellular component)
-# cica <- getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"))
+# cica <- getGO(cica, alpha = 0.05, db = c("BP", "MF", "CC"), ncores = 4)
 ```
 
 You can compare lists of enriched GO from different runs or datasets. See function `overlapGO()` for more.

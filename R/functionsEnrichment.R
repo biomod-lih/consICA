@@ -26,8 +26,8 @@ enrichGO <- function(genes,
                            "genename"),
                     algorithm = "weight",
                     do.sort=TRUE,randomFraction=0,return.genes=FALSE){
-
-  groupGOTerms() 
+  
+  topGO::groupGOTerms() 
   if (is.na(ntop)) message("ntop is NA => using FDR (FC) as limits\n")
   
   ## create score depending on threshold and paradigm
@@ -108,6 +108,7 @@ Return NULL\n")
 #' @param thr.fdr significance threshold for FDR 
 #' @param thr.fc significance threshold for absolute logFC
 #' @return numeric score vector
+#' @keywords internal
 get_score <- function(genes, fc, thr.fc, fdr, thr.fdr, ntop){
   
   ## create score depending on threshold and paradigm

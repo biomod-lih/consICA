@@ -1,7 +1,8 @@
 #' @title Assigns IC signatures to Gene Ontologies
 #' @description Assigns extracted independent components to Gene Ontologies and
 #' rotate independent components (`S` matrix) to set most significant 
-#' Gene Ontologies as positive affecting features
+#' Gene Ontologies as positive affecting features. Set `ncores` param for 
+#' paralleled calculations.
 #' @param cica  list compliant to `consICA()` result
 #' @param alpha value in [0,1] interval. Used to filter features with 
 #' FDR < `alpha`. Default value is 0.05
@@ -11,6 +12,8 @@
 #' @param genome R-package for genome annotation used. For human -
 #' 'org.Hs.eg.db'
 #' @param db name of GO database: "BP","MF","CC"
+#' @param ncores number of cores for parallel calculation. Default 
+#' value is 4
 #' @param rotate rotate components in `S` and `M` matricies in `cica` object 
 #' to set most significant Gene Ontologies as positive effective features. 
 #' Default is TRUE
@@ -31,18 +34,23 @@
 #' @author Petr V. Nazarov
 #' @examples
 #' data("samples_data")
+#' # Calculate ICA (run with ntry=1 for quick test, use more in real analysis)
+#' cica <- consICA(samples_data, ncomp=4, ntry=1, show.every=0) 
 #' # cica <- consICA(samples_data, ncomp=40, ntry=1, show.every=0)
-#' cica <- consICA(samples_data, ncomp=2, ntry=1, show.every=0) # timesaving 
-#' example
-#' cica <- getGO(cica, db = "BP")
+#' 
+#' # Annotate independent components with gene ontoligies
+#' cica <- getGO(cica, db = "BP", ncores=4)
+#' # Positively affected GOs for 2nd independent component
 #' head(cica$GO$GOBP$ic02$pos)
 #' @export
+
 getGO <- function(cica,
-                 alpha=0.05, 
-                 genenames=NULL, 
-                 genome="org.Hs.eg.db",
-                 db=c("BP", "CC", "MF"),
-                 rotate=TRUE){
+                  alpha=0.05, 
+                  genenames=NULL, 
+                  genome="org.Hs.eg.db",
+                  db=c("BP", "CC", "MF"),
+                  ncores = 4,
+                  rotate=TRUE){
   
   if(!is.consICA(cica)) {
     message("First parameter should be compliant to `consICA()` result\n")
@@ -56,18 +64,26 @@ getGO <- function(cica,
   
   genes_id_type <- c("entrez", "ensembl", "symbol", "genename")
 
-  Genes <- list()
-  if(is_bp)GOBP <- list()
-  if(is_cc)GOCC <- list()
-  if(is_mf)GOMF <- list()
-
   if(!(is_bp | is_cc | is_mf)){
     message("Check db parameter!\n")
     return(NULL)
   }
   
-  icomp <- 1
-  for (icomp in seq.int(1,ncol(IC$S))){
+  par_getGO<-function(X,IC=IC,genenames,is_bp,is_cc,is_mf,genes_id_type,genome,
+                        enrichGO=enrichGO,
+                        get_score=get_score, SelectScore=SelectScore){
+    suppressPackageStartupMessages({
+      requireNamespace("topGO")
+      requireNamespace("org.Hs.eg.db")
+      requireNamespace("GO.db")
+    })
+    
+    GOBP <- list()
+    GOCC <- list()
+    GOMF <- list()
+    
+    icomp <- X
+    
     pv <- pnorm(IC$S[,icomp],mean=median(IC$S[,icomp]),sd=mad(IC$S[,icomp]))
     pv[pv>0.5] <- 1-pv[pv>0.5]
     fdr <- p.adjust(pv,method="BH")
@@ -85,63 +101,79 @@ getGO <- function(cica,
         genes <- genenames
       }
     }
-    
-    if(is_bp)GOBP[[sprintf("ic%02d",icomp)]] <- list()
-    if(is_cc)GOCC[[sprintf("ic%02d",icomp)]] <- list()
-    if(is_mf)GOMF[[sprintf("ic%02d",icomp)]] <- list()
+
+    GOBP[[sprintf("ic%02d",icomp)]] <- list()
+    GOCC[[sprintf("ic%02d",icomp)]] <- list()
+    GOMF[[sprintf("ic%02d",icomp)]] <- list()
     message("---- Component ",icomp," ----\n")
-    if(is_bp)GOBP[[icomp]]$pos <- enrichGO(genes = genes,
-                                          fdr = fdr.pos,thr.fdr=alpha,db="BP",
-                                          id = genes_id_type,
-                                          genome=genome)
-    if(is_cc)GOCC[[icomp]]$pos <- enrichGO(genes = genes,
-                                          fdr = fdr.pos,thr.fdr=alpha,db="CC",
-                                          id= c("entrez", "ensembl", "symbol", 
-                                                "genename"),
-                                          genome=genome)
-    if(is_mf)GOMF[[icomp]]$pos <- enrichGO(genes = genes,
-                                          fdr = fdr.pos,thr.fdr=alpha,db="MF",
-                                          id= genes_id_type,
-                                          genome=genome)
+    
+    message(str(GOBP))
+    if(is_bp)GOBP[[1]]$pos <- enrichGO(genes = genes,
+                                       fdr = fdr.pos,thr.fdr=alpha,db="BP",
+                                       id = genes_id_type,
+                                       genome=genome)
+    if(is_cc)GOCC[[1]]$pos <- enrichGO(genes = genes,
+                                       fdr = fdr.pos,thr.fdr=alpha,db="CC",
+                                       id= genes_id_type,
+                                       genome=genome)
+    if(is_mf)GOMF[[1]]$pos <- enrichGO(genes = genes,
+                                       fdr = fdr.pos,thr.fdr=alpha,db="MF",
+                                       id= genes_id_type,
+                                       genome=genome)
 
-    if(is_bp)GOBP[[icomp]]$neg <- enrichGO(genes = genes,
-                                          fdr = fdr.neg,thr.fdr=alpha,db="BP",
-                                          id= genes_id_type,
-                                          genome=genome)
-    if(is_cc)GOCC[[icomp]]$neg <- enrichGO(genes = genes,
-                                          fdr = fdr.neg,thr.fdr=alpha,db="CC",
-                                          id= genes_id_type,
-                                          genome=genome)
-    if(is_mf)GOMF[[icomp]]$neg <- enrichGO(genes = genes,
-                                          fdr = fdr.neg,thr.fdr=alpha,db="MF",
-                                          id= genes_id_type,
-                                          genome=genome)
-
+    if(is_bp)GOBP[[1]]$neg <- enrichGO(genes = genes,
+                                       fdr = fdr.neg,thr.fdr=alpha,db="BP",
+                                       id= genes_id_type,
+                                       genome=genome)
+    if(is_cc)GOCC[[1]]$neg <- enrichGO(genes = genes,
+                                       fdr = fdr.neg,thr.fdr=alpha,db="CC",
+                                       id= genes_id_type,
+                                       genome=genome)
+    if(is_mf)GOMF[[1]]$neg <- enrichGO(genes = genes,
+                                       fdr = fdr.neg,thr.fdr=alpha,db="MF",
+                                       id= genes_id_type,
+                                       genome=genome)
+    
+    return(list(GOBP=GOBP, GOCC=GOCC,GOMF=GOMF))
   }
+  
+  bpparam <-NULL
+  bp_param <- set_bpparam(ncores, BPPARAM = bpparam)
+  bp_param$progressbar <- TRUE
+  seqicomp <- seq.int(1,ncol(IC$S))
+  RESGO <- bplapply(X=seqicomp, FUN = par_getGO, BPPARAM = bp_param,
+                    IC=IC,genenames=genenames,is_bp=is_bp, is_cc=is_cc, 
+                    is_mf=is_mf,genes_id_type=genes_id_type,genome=genome, 
+                    enrichGO=enrichGO, get_score=get_score, 
+                    SelectScore=SelectScore)
+  
   GO <- list()
   if(is_bp) {
-    GO <- append(GO, list(GOBP))
+    la <- lapply(seqicomp, function(i) RESGO[[i]]$GOBP[[1]])
+    names_ics <- sprintf("ic%02d",seqicomp)
+    names(la) <- names_ics
+    GO <- append(GO, list("GOBP"=la))
     names(GO) <- c(names(GO)[-length(names(GO))], "GOBP")
-    rm(GOBP)
   }
   if(is_cc) {
-    GO <- append(GO, list(GOCC))
+    la <- lapply(seqicomp, function(i) RESGO[[i]]$GOCC[[1]])
+    names_ics <- sprintf("ic%02d",seqicomp)
+    names(la) <- names_ics
+    GO <- append(GO, list("GOCC"=la))
     names(GO) <- c(names(GO)[-length(names(GO))], "GOCC")
-    rm(GOCC)
   }
   if(is_mf) {
-    GO <- append(GO, list(GOMF))
+    la <- lapply(seqicomp, function(i) RESGO[[i]]$GOMF[[1]])
+    names_ics <- sprintf("ic%02d",seqicomp)
+    names(la) <- names_ics
+    GO <- append(GO, list("GOMF"=la))
     names(GO) <- c(names(GO)[-length(names(GO))], "GOMF")
-    rm(GOMF)
   }
-
   cica$GO <- GO
-  rm(GO)
-  
   if(rotate){
     cica <- setOrientation(cica)
-  } 
-
+  }
+  rm(GO, RESGO)
   gc()
   return(cica)
 }
