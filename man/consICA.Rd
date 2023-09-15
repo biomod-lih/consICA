@@ -36,8 +36,8 @@ See \code{\link[SummarizedExperiment]{SummarizedExperiment-class}}}
 \item{filter.thr}{Filter out genes (rows) with max value lower than this 
 value from `X`}
 
-\item{ncores}{number of cores to be set for parallel calculation. Default 
-value is 1}
+\item{ncores}{number of cores for parallel calculation. Default 
+value is 4}
 
 \item{bpparam}{parameters from the `BiocParallel`}
 

@@ -62,3 +62,4 @@ multiple-run calculations for consensus Independent Component Analysis (ICA)
 \author{
 Maryna Chepeleva
 }
+\keyword{internal}

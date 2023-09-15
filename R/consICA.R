@@ -12,8 +12,8 @@
 #' `ncore`s > 1). Default value is 1
 #' @param filter.thr Filter out genes (rows) with max value lower than this 
 #' value from `X` 
-#' @param ncores number of cores to be set for parallel calculation. Default 
-#' value is 1
+#' @param ncores number of cores for parallel calculation. Default 
+#' value is 4
 #' @param bpparam parameters from the `BiocParallel`
 #' @param reduced If TRUE returns reduced result (no `X`, `i.best`, 
 #' see 'return')
@@ -387,13 +387,15 @@ oneICA <- function(X,
         Xse <- X
         X <- as.matrix(assay(X))
       } else {
-        if(length(which(names(SummarizedExperiment::assays(X)) == assay_string)) == 0){
+        if(length(which(names(SummarizedExperiment::assays(X)) == assay_string)) 
+                                                                          == 0){
           message(
             "Given name of assay was not found in X. Check `assay_string`")
           return(NULL)
         }
         if (!is.null(filter.thr)) {
-          ind <- apply(SummarizedExperiment::assays(X)[[assay_string]],1,max)>filter.thr
+          ind <- apply(SummarizedExperiment::assays(X)[[assay_string]],1,max)>
+                                                                      filter.thr
           X <-  X[ind,]
         }
         Xse <- X

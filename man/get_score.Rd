@@ -25,3 +25,4 @@ numeric score vector
 \description{
 Create score depending on threshold and paradigm
 }
+\keyword{internal}

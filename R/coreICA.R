@@ -13,6 +13,7 @@
 #'        `n.comp` principal components}
 #'        
 #' @author Maryna Chepeleva
+#' @keywords internal
 # @examples
 # Z <- matrix(rnorm(2000),nrow=100)
 # preICA <- outICA(Z, n.comp=5)
@@ -52,7 +53,7 @@ outICA <- function(X, n.comp, row.norm = FALSE, verbose = FALSE){
   #K <- D %*% t(s$u)
   K <- mat.mult(D, t(s$u))
   
-  K <- matrix(K[1:n.comp, ], n.comp, p)
+  K <- matrix(K[seq.int(1,n.comp), ], n.comp, p)
   #X1 <- K %*% X
   X1 <- mat.mult(K, X)
   
@@ -90,6 +91,7 @@ outICA <- function(X, n.comp, row.norm = FALSE, verbose = FALSE){
 #'         \item{S}{estimated source matrix}
 #'        
 #' @author Maryna Chepeleva
+#' @keywords internal
 # @examples
 # Z <- matrix(rnorm(2000),nrow=100)
 # ic1 <- coreICA(Z, n.comp=5, alg.typ="deflation",fun="logcosh")
