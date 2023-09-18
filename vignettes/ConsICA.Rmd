@@ -68,7 +68,7 @@ matrix of statistically independent and biologically meaningful signals (metagen
 
 ```{r}
 set.seed(2022)
-cica <- consICA(samples_data, ncomp=20, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=20, ntry=10, ncores=1, show.every=0)
 ```
 The output of consensus ICA is a list with input data `X` (assays of SummarizedExperiment  `samples_data` object) and it dimensions, consensus metagene `S` and weight matrix `M`, number of components, mean R2 between rows of M (`mr2`), stability as mean R2 between consistent columns of S in multiple tries  (`stab`) and number of best iteration (`ibest`). For compact output use `reduced` = TRUE.
 ```{r}

@@ -76,7 +76,7 @@ Implements efficient ICA calculations.
 \examples{
 data("samples_data")
 # Deconvolve into independent components
-cica <- consICA(samples_data, ncomp=15, ntry=10, show.every=0)
+cica <- consICA(samples_data, ncomp=15, ntry=10, ncores=1, show.every=0)
 # X = S * M, where S - independent signals matrix, M - weights matrix
 dim(samples_data)
 dim(cica$S)
