@@ -50,10 +50,10 @@ data("samples_data")
 # Calculate ICA (run with ntry=1 for quick test, use more in real analysis)
 cica1 <- consICA(samples_data, ncomp=5, ntry=1, show.every=0)
 # Search enriched gene ontologies
-cica1 <- getGO(cica1, db = "BP")
+cica1 <- getGO(cica1, db = "BP", ncores = 1)
 # Calculate ICA and GOs for another dataset
 cica2 <- consICA(samples_data[,1:100], ncomp=4, ntry=1, show.every=0) 
-cica2 <- getGO(cica2, db = "BP")
+cica2 <- getGO(cica2, db = "BP", ncores = 1)
 # Compare two lists of enriched GOs 
 # Jaccard index
 jc <- overlapGO(GO1 = cica1$GO$GOBP, GO2 = cica2$GO$GOBP, 
