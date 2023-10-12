@@ -33,17 +33,15 @@
 #'     \item{Score}{genes score}
 #' @author Petr V. Nazarov
 #' @examples
-#' \dontrun{
 #' data("samples_data")
 #' # Calculate ICA (run with ntry=1 for quick test, use more in real analysis)
-#' cica <- consICA(samples_data, ncomp=4, ntry=1, ncores=1, show.every=0) 
-#' # cica <- consICA(samples_data, ncomp=40, ntry=1, show.every=0)
+#' cica <- consICA(samples_data, ncomp=2, ntry=1, ncores=1, show.every=0) 
+#' # cica <- consICA(samples_data, ncomp=40, ntry=20, show.every=0)
 #' 
 #' # Annotate independent components with gene ontoligies
 #' cica <- getGO(cica, db = "BP", ncores=1)
 #' # Positively affected GOs for 2nd independent component
 #' head(cica$GO$GOBP$ic02$pos)
-#' }
 #' @export
 
 getGO <- function(cica,

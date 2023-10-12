@@ -46,6 +46,7 @@ take the order of enriched GO into account.
 Results are from -1 to 1. Zero means no similarity.
 }
 \examples{
+\dontrun{
 data("samples_data")
 # Calculate ICA (run with ntry=1 for quick test, use more in real analysis)
 cica1 <- consICA(samples_data, ncomp=5, ntry=1, show.every=0)
@@ -61,6 +62,7 @@ method = "jaccard", fdr = 0.01)
 # Cosine similarity
 cos_sim <- overlapGO(GO1 = cica1$GO$GOBP, GO2 = cica2$GO$GOBP, 
 method = "cosine", fdr = 0.01)
+}
 }
 \author{
 Maryna Chepeleva

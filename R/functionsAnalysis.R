@@ -130,6 +130,7 @@ anovaIC <- function(cica, Var=NULL, icomp = 1, plot = TRUE, mode = "violin",
 #' Results are from -1 to 1. Zero means no similarity.
 #' @author Maryna Chepeleva
 #' @examples
+#' \dontrun{
 #' data("samples_data")
 #' # Calculate ICA (run with ntry=1 for quick test, use more in real analysis)
 #' cica1 <- consICA(samples_data, ncomp=5, ntry=1, show.every=0)
@@ -146,6 +147,7 @@ anovaIC <- function(cica, Var=NULL, icomp = 1, plot = TRUE, mode = "violin",
 #' # Cosine similarity
 #' cos_sim <- overlapGO(GO1 = cica1$GO$GOBP, GO2 = cica2$GO$GOBP, 
 #' method = "cosine", fdr = 0.01)
+#' }
 #' @export
 overlapGO <- function(GO1, GO2, method = c("cosine", "jaccard"), fdr = 0.01){
   
