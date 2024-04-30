@@ -3,7 +3,7 @@ Type: Package
 biocViews: Technology, StatisticalMethod, Sequencing, RNASeq, Transcriptomics, 
   Classification, FeatureExtraction
 Title: consensus Independent Component Analysis
-Version: 2.1.0
+Version: 2.2.0
 Authors@R: 
     c(person(given = "Petr V.",
              family = "Nazarov",
