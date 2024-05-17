@@ -12,7 +12,7 @@ BiocManager::install("consICA")
 Package is also available on github
 ```r
 library(devtools)
-install_github("biomod-bsu/consICA")
+install_github("biomod-lih/consICA")
 ```  
 
 ### Quick start
