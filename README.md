@@ -9,7 +9,7 @@ if (!requireNamespace("BiocManager", quietly=TRUE))
 BiocManager::install("consICA")
 ```
 
-Package is also available on github
+Package is also available on GitHub
 ```r
 library(devtools)
 install_github("biomod-lih/consICA")
@@ -31,5 +31,6 @@ browseVignettes("consICA")
 petr.nazarov@lih.lu
 
 ## References
-1. Nazarov, P.V., Wienecke-Baldacchino, A.K., Zinovyev, A. et al. Deconvolution of transcriptomes and miRNomes by independent component analysis provides insights into biological processes and clinical outcomes of melanoma patients. BMC Med Genomics 12, 132 (2019). https://doi.org/10.1186/s12920-019-0578-4
-2. Chepeleva M, Kaoma T, Muller A et al. сonsICA: Multimodal data deconvolution, integration and elucidation of biological processes in cancer research [version 1; not peer reviewed]. F1000Research 2023, 12:1260 ([Poster](https://f1000research.com/posters/12-1260)). https://doi.org/10.7490/f1000research.1119635.1
+1. Maryna Chepeleva, Tony Kaoma, Andrei Zinovyev, Reka Toth, Petr V Nazarov, consICA: an R package for robust reference-free deconvolution of multi-omics data, Bioinformatics Advances, Volume 4, Issue 1, 2024, vbae102, https://doi.org/10.1093/bioadv/vbae102
+2. Nazarov, P.V., Wienecke-Baldacchino, A.K., Zinovyev, A. et al. Deconvolution of transcriptomes and miRNomes by independent component analysis provides insights into biological processes and clinical outcomes of melanoma patients. BMC Med Genomics 12, 132 (2019). https://doi.org/10.1186/s12920-019-0578-4
+3. Chepeleva M, Kaoma T, Muller A et al. сonsICA: Multimodal data deconvolution, integration and elucidation of biological processes in cancer research [version 1; not peer reviewed]. F1000Research 2023, 12:1260 ([Poster](https://f1000research.com/posters/12-1260)). https://doi.org/10.7490/f1000research.1119635.1
