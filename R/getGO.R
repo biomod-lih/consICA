@@ -107,7 +107,6 @@ getGO <- function(cica,
     GOMF[[sprintf("ic%02d",icomp)]] <- list()
     message("---- Component ",icomp," ----\n")
     
-    message(str(GOBP))
     if(is_bp)GOBP[[1]]$pos <- enrichGO(genes = genes,
                                        fdr = fdr.pos,thr.fdr=alpha,db="BP",
                                        id = genes_id_type,
