@@ -17,6 +17,13 @@ test_that("consICA test", {
   expect_equal(length(rownames(cica10$M)), 6)
   expect_true(is.null(cicaNA))
   expect_true(is.null(cica_redu$X))
+  expect_true(is.consICA(cica10))
+  expect_true(all(is.finite(cica10$S)))
+  expect_true(all(is.finite(cica10$M)))
+  expect_equal(nrow(cica10$S), nrow(cica10$X))
+  expect_equal(ncol(cica10$M), ncol(cica10$X))
+  expect_equal(ncol(cica10$stab), 6L) 
+  expect_true(all(cica10$stab >= 0 & cica10$stab <= 1)) 
 })
 
 test_that("oneICA test", {
