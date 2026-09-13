@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{is.consICA}
 \alias{is.consICA}
-\title{Is the object is consensus ICA compliant?}
+\title{Is the object consensus ICA compliant?}
 \usage{
 is.consICA(cica)
 }
@@ -18,6 +18,6 @@ of `consICA()`
 }
 \examples{
 # returns TRUE
-is.consICA(list("ncomp" = 2, "nsples" = 2, "nfeatures" = 2, 
+is.consICA(list("ncomp" = 2, "nsamples" = 2, "nfeatures" = 2, 
                 "S" = matrix(0,2,2),"M" = matrix(0,2,2)))
 }

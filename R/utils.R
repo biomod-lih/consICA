@@ -1,4 +1,4 @@
-#' @title Is the object is consensus ICA compliant?
+#' @title Is the object consensus ICA compliant?
 #' @description Check if the object is a list in the same format as the result 
 #' of `consICA()`
 #' @param cica list
@@ -6,7 +6,7 @@
 #' @usage is.consICA(cica)
 #' @examples 
 #' # returns TRUE
-#' is.consICA(list("ncomp" = 2, "nsples" = 2, "nfeatures" = 2, 
+#' is.consICA(list("ncomp" = 2, "nsamples" = 2, "nfeatures" = 2, 
 #'                 "S" = matrix(0,2,2),"M" = matrix(0,2,2)))
 #' @export
 is.consICA <- function(cica){

@@ -1,5 +1,5 @@
 ---
-title: 'The consICa package: User’s manual'
+title: 'The consICA package: User’s manual'
 author: Petr V. Nazarov, Tony Kaoma, Maryna Chepeleva
 date: "`r Sys.Date()`"
 abstract: This vignette describes the Bioconductor package consICA. We developed a fast parallelized algorithm for deconvolution of omics data, based on the independent component analysis. Additionally, we implemented convenient functionality for the analysis of decomposed signals including ANOVA-based linking to experimental factors, enrichment analysis, and survival analysis. A PDF report can be generated automatically by the package. The package was previously applied to single-cell and bulk-sample transcriptomics data in the field of cancer research. We showed the ability of the approach to (i) separate biologically relevant molecular signals from technical biases, (ii) identify molecular signals specific to cell types and cellular processes, (iii) provide a feature engineering mechanism improving the classification of the samples [1,2,3].
