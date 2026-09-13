@@ -1,6 +1,11 @@
  <img src="man/figures/logo_consICA.png" align="right" height="200" alt="consICA logo"/>
 
 # consICA: Consensus ICA R-package for multiomics data analysis
+
+[![Years in Bioconductor](https://bioconductor.org/shields/years-in-bioc/consICA.svg)](https://bioconductor.org/packages/consICA/)
+[![DOI](https://img.shields.io/badge/DOI-10.1093%2Fbioadv%2Fvbae102-blue.svg)](https://doi.org/10.1093/bioadv/vbae102)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/biomod-lih/consICA/blob/main/LICENSE)
+
 consICA implements a data-driven deconvolution method – consensus independent component analysis (ICA) to decompose heterogeneous omics data and extract features suitable for patient diagnostics and prognostics. The method separates biologically relevant transcriptional signals from technical effects and provides information about cellular composition and biological processes [1]. The implementation of parallel computing in the package ensures the efficient analysis on the modern multicore systems.
 
 ## Installation
@@ -24,10 +29,33 @@ sudo apt-get install -y libgsl0-dev
 ```
 
 ## Quick start
-Read vignette
+```r
+library(consICA)
+library(SummarizedExperiment)
+data("samples_data") # example SKCM TCGA cohort (SummarizedExperiment)
+
+# Consensus ICA: decompose expression into ICs (S) and weights (M)
+cica <- consICA(samples_data, ncomp = 20, ntry = 10, ncores = 4)
+
+# Top genes contributing to each component
+features <- getFeatures(cica, alpha = 0.05)
+head(features$ic.1$pos)
+
+# Functional annotation: enriched GO terms for each component
+cica <- getGO(cica, db = "BP", ncores = 4)
+
+# PDF report: components, factors, survival and GO
+Var  <- as.data.frame(colData(samples_data))
+Sur <- Var[, c("time", "event")]
+factors <- c("gender", "age_at_initial_pathologic_diagnosis",
+             "Cancer.Type.Detailed", "UV.signature", "BRAFV600.",
+             "Tumor.tissue.site")
+saveReport(cica, Var = Var[, factors], surv = Sur, file = "Report_cica20.pdf")
+```
+See the vignette for the full walkthrough:
 ```r
 browseVignettes("consICA")
-``` 
+```
 
 ## Contact
 petr.nazarov@lih.lu
