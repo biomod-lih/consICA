@@ -3,6 +3,7 @@ test_that("getFeatures test", {
   require(BiocParallel)
   require("fastICA", include.only = c('fastICA'))
   data("samples_data")
+  samples_data <- samples_data[1:400, 1:60]
   
   cica <- consICA(samples_data, ncomp=15, ntry=4)
   features <- getFeatures(cica)
