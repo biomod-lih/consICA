@@ -3,7 +3,7 @@ Type: Package
 biocViews: Technology, StatisticalMethod, Sequencing, RNASeq, Transcriptomics, 
   Classification, FeatureExtraction
 Title: consensus Independent Component Analysis
-Version: 2.11.3
+Version: 2.11.4
 Authors@R: 
     c(person(given = "Petr V.",
              family = "Nazarov",
@@ -29,6 +29,7 @@ Description: consICA implements a data-driven deconvolution method – consensus
   The implementation of parallel computing in the package ensures efficient 
   analysis of modern multicore systems.
 BugReports: https://github.com/biomod-lih/consICA/issues
+URL: https://github.com/biomod-lih/consICA
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
