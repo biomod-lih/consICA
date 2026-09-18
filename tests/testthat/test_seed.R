@@ -1,15 +1,22 @@
-test_that("consICA(seed=) is reproducible, including in parallel", {
+test_that("consICA(seed=) is reproducible on a single core", {
 
     require("fastICA", include.only = c('fastICA'))
     data("samples_data")
     X <- samples_data[1:400, 1:60]
 
-    # single core
     a1 <- consICA(X, ncomp = 3, ntry = 2, ncores = 1, seed = 1, show.every = 0)
     a2 <- consICA(X, ncomp = 3, ntry = 2, ncores = 1, seed = 1, show.every = 0)
     expect_equal(a1$S, a2$S)
+})
 
-    # parallel (2 cores)
+test_that("consICA(seed=) is reproducible in parallel", {
+
+    skip_on_bioc()
+
+    require("fastICA", include.only = c('fastICA'))
+    data("samples_data")
+    X <- samples_data[1:400, 1:60]
+
     p1 <- consICA(X, ncomp = 3, ntry = 2, ncores = 2, seed = 1, show.every = 0)
     p2 <- consICA(X, ncomp = 3, ntry = 2, ncores = 2, seed = 1, show.every = 0)
     expect_equal(p1$S, p2$S)
